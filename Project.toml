@@ -1,0 +1,7 @@
+name = "Assignment3"
+uuid = "9c604635-1385-46f0-8a51-c9e1651f4fd6"
+authors = ["David Fridovich-Keil <dfk@utexas.edu>"]
+version = "0.1.0"
+
+[deps]
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
