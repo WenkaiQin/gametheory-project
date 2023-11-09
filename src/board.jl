@@ -191,6 +191,40 @@ function up_next(board)
 end
 export up_next
 
+function strike_zone(x,y,dir)
+    # Strike zone is a "cone" that follows a 1-3-3-5-5 grid sequence
+    # dir is a string 
+
+    # Construct grid relative to [0 0] (origin)
+    augmented_grid = [[ii jj] for ii ∈ 1:5, jj ∈ -2:2]
+    reshape_grid = reshape(augmented_grid,(5^2,1))
+    for ii ∈ 1:3
+        for jj ∈ -2:2
+            if ii == 1 && jj ≠ 0
+                reshape_grid = filter(x->x ≠ [ii jj],reshape_grid)
+            elseif (ii == 2 || ii == 3) && (jj == 2 || jj == -2)           
+                reshape_grid = filter(x->x ≠ [ii jj],reshape_grid)
+            end
+        end
+    end
+    # Rotate grid according to strike direction
+    if dir == "right"
+        reshape_grid = reshape_grid
+    elseif dir == "left"
+        reshape_grid = [[-point[1] point[2]] for point ∈ reshape_grid]
+    elseif dir == "up"
+        reshape_grid = [[point[2] point[1]] for point ∈ reshape_grid]
+    elseif dir == "down"
+        reshape_grid = [[point[2] -point[1]] for point ∈ reshape_grid]
+    end
+
+    # Translate grid to being relative to current position of player
+    reshape_grid .+= [[x y]]
+
+    return reshape_grid
+end
+export strike_zone
+
 # # Check if the game is over. If it is over, returns the outcome.
 function is_over(board)
     # If player i is in player j's strike zone and player j is not in player i's strike zone, then player i loses
@@ -203,17 +237,17 @@ function is_over(board)
     y1 = pos_p1.y_position
     y2 = pos_p2.y_position
     
-    println(x1)
-    println(x2)
-    println(y1)
-    println(y2)
-    println(pos_p1.direction)
-    println(pos_p2.direction)
     # Strike zones of each player based on their direction in current moves:
     strikeZone_p1 = strike_zone(x1,y1,pos_p1.direction)
     strikeZone_p2 = strike_zone(x2,y2,pos_p2.direction)
 
     # Check conditions:
+    condition1 = [x1 y1] ∉ strikeZone_p2
+    condition2 = [x2 y2] ∈ strikeZone_p1
+    println(condition1)
+    println(condition2)
+    println([x2 y2])
+    println(strikeZone_p1)
     if [x1 y1] ∈ strikeZone_p2 && [x2 y2] ∉ strikeZone_p1
         return true,-1
     elseif [x1 y1] ∉ strikeZone_p2 && [x2 y2] ∈ strikeZone_p1
@@ -223,14 +257,14 @@ function is_over(board)
     else
         return false,NaN
     end
-
 end
 export is_over
 
 p1_moves = [GridMove(1,3,"right"), GridMove(2,3,"right")]
-p2_moves = [GridMove(6,6,"left"), GridMove(5,6,"left")]
+p2_moves = [GridMove(5,3,"up"), GridMove(5,4,"up")]
 b = GridBoard(p1_moves,p2_moves)
-is_over(b)
+over,result = is_over(b)
+println(over)
 # function is_over(b)
 
 #     # Enumerate and check horizontal wins, then vertical wins.
@@ -274,40 +308,6 @@ is_over(b)
 
 # end
 # export is_over
-
-function strike_zone(x,y,dir)
-    # Strike zone is a "cone" that follows a 1-3-3-5-5 grid sequence
-    # dir is a string 
-
-    # Construct grid relative to [0 0] (origin)
-    augmented_grid = [[ii jj] for ii ∈ 1:5, jj ∈ -2:2]
-    reshape_grid = reshape(augmented_grid,(5^2,1))
-    for ii ∈ 1:3
-        for jj ∈ -2:2
-            if ii == 1 && jj ≠ 0
-                reshape_grid = filter(x->x ≠ [ii jj],reshape_grid)
-            elseif (ii == 2 || ii == 3) && (jj == 2 || jj == -2)           
-                reshape_grid = filter(x->x ≠ [ii jj],reshape_grid)
-            end
-        end
-    end
-    # Rotate grid according to strike direction
-    if dir == "right"
-        reshape_grid = reshape_grid
-    elseif dir == "left"
-        reshape_grid = [[-point[1],point[2]] for point ∈ reshape_grid]
-    elseif dir == "up"
-        reshape_grid = [[point[2],point[1]] for point ∈ reshape_grid]
-    elseif dir == "down"
-        reshape_grid = [[point[2],-point[1]] for point ∈ reshape_grid]
-    end
-
-    # Translate grid to being relative to current position of player
-    reshape_grid = [[x,y]].+reshape_grid
-
-    return reshape_grid
-end
-export strike_zone
 
 # Utility for printing boards out to the terminal.
 function Base.show(io::IO, b::GridBoard)
