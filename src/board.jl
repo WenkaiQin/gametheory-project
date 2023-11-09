@@ -126,51 +126,77 @@ function up_next(board)
 end
 export up_next
 
-# # Check if the game is over. If it is over, returns the outcome.
-# function is_over(b)
+# Check if the game is over. If it is over, returns the outcome.
+function is_over(b)
 
-#     # Enumerate and check horizontal wins, then vertical wins.
-#     for i in 1:3
-#         winning_row = Set()
-#         winning_col = Set()
-#         for j in 1:3
-#             push!(winning_row, GridMove(i,j))
-#             push!(winning_col, GridMove(j,i))
-#         end
+    # Enumerate and check horizontal wins, then vertical wins.
+    for i in 1:3
+        winning_row = Set()
+        winning_col = Set()
+        for j in 1:3
+            push!(winning_row, GridMove(i,j))
+            push!(winning_col, GridMove(j,i))
+        end
 
-#         if     winning_row ⊆ Set(b.Xs) || winning_col ⊆ Set(b.Xs)
-#             return true, -1
-#         elseif winning_row ⊆ Set(b.Os) || winning_col ⊆ Set(b.Os)
-#             return true, 1
-#         end
-#     end
+        if     winning_row ⊆ Set(b.Xs) || winning_col ⊆ Set(b.Xs)
+            return true, -1
+        elseif winning_row ⊆ Set(b.Os) || winning_col ⊆ Set(b.Os)
+            return true, 1
+        end
+    end
 
-#     # Now, diagonals.
-#     winning_diag_L = Set()
-#     winning_diag_R = Set()
+    # Now, diagonals.
+    winning_diag_L = Set()
+    winning_diag_R = Set()
 
-#     for i in 1:3
-#         push!(winning_diag_L, GridMove(i,  i))
-#         push!(winning_diag_R, GridMove(i,4-i))
-#     end
+    for i in 1:3
+        push!(winning_diag_L, GridMove(i,  i))
+        push!(winning_diag_R, GridMove(i,4-i))
+    end
 
-#     if     winning_diag_L ⊆ Set(b.Xs) ||  winning_diag_R ⊆ Set(b.Xs)
-#         return true, -1
-#     elseif winning_diag_L ⊆ Set(b.Os) ||  winning_diag_R ⊆ Set(b.Os)
-#         return true, 1
-#     end
+    if     winning_diag_L ⊆ Set(b.Xs) ||  winning_diag_R ⊆ Set(b.Xs)
+        return true, -1
+    elseif winning_diag_L ⊆ Set(b.Os) ||  winning_diag_R ⊆ Set(b.Os)
+        return true, 1
+    end
 
-#     # Check for ties.
-#     if length(b.Xs) + length(b.Os) ≥ 9
-#         return true, 0
-#     end
+    # Check for ties.
+    if length(b.Xs) + length(b.Os) ≥ 9
+        return true, 0
+    end
 
-#     # If no ending states detected, the game is not over yet.
-#     return false, NaN
+    # If no ending states detected, the game is not over yet.
+    return false, NaN
 
-# end
-# export is_over
+end
+export is_over
 
+function strike_zone()
+    # Strike zone is a "cone" that follows a 1-3-3-5-5 grid sequence
+    # start = [0 0]
+    # grdPts = [[start[1]+i 0] for ii ∈ 1:5]
+    # for ii ∈ 2:5
+    #     if ii == 2 || ii == 3
+    #         push!(grdPts, grdPts[ii]+[0 1], grdPts[ii]-[0 1])
+    #     elseif ii == 4 || ii = 5
+    #         push!(grdPts,[grdPts[ii]+[0 jj] for jj ∈ 1:2], [grdPts[ii]-[0 jj] for jj ∈ 1:2])
+    #     end
+    # end
+
+    augmented_grid = [[ii jj] for ii ∈ 1:5, jj ∈ -2:2]
+    reshape_grid = reshape(augmented_grid,(5^2,1))
+    for ii ∈ 1:3
+        for jj ∈ -2:2
+            if ii == 1 && jj ≠ 0
+                reshape_grid = filter(x->x ≠ [ii jj],reshape_grid)
+            elseif (ii == 2 || ii == 3) && (jj == 2 || jj == -2)           
+                reshape_grid = filter(x->x ≠ [ii jj],reshape_grid)
+            end
+        end
+    end
+    println(reshape_grid)
+end
+strike_zone()
 # # Utility for printing boards out to the terminal.
 # function Base.show(io::IO, b::TicTacToeBoard)
 #     for ii in 1:3
