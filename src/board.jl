@@ -1,5 +1,3 @@
-# TODO: Make MOVEMENT_PER_TURN, GRID_SIZE properties of the board.
-
 # Abstract types for Board and Move.
 abstract type Board end
 export Board
@@ -7,8 +5,8 @@ export Board
 abstract type Position end
 export Position
 
-MOVEMENT_PER_TURN = 4
-GRID_SIZE = 20
+DEFAULT_GRID_SIZE = 20
+DEFAULT_RANGE = 4
 VALID_DIRECTIONS = ["left","right","up","down"]
 
 struct GridMove <: Position
@@ -16,6 +14,7 @@ struct GridMove <: Position
     x_position::Int
     y_position::Int
     direction::String
+
 
     function GridMove(x_pos, y_pos, dir)
         new(x_pos, y_pos, dir)
@@ -34,13 +33,19 @@ mutable struct GridBoard <: Board
 
     p1_moves::AbstractArray{GridMove}
     p2_moves::AbstractArray{GridMove}
+    grid_size::Int
+    range::Int
+
+    function GridBoard(p1_ms, p2_ms, g_size, rng)
+        new(p1_ms, p2_ms, g_size, rng)
+    end
 
     function GridBoard()
-        new([],[])
+        new([], [], DEFAULT_GRID_SIZE, DEFAULT_RANGE)
     end
 
     function GridBoard(p1_ms, p2_ms)
-        new(p1_ms, p2_ms)
+        new(p1_ms, p2_ms, DEFAULT_GRID_SIZE, DEFAULT_RANGE)
     end
 
 end # struct
@@ -62,21 +67,18 @@ function next_moves(board)
     all_next_m = []
 
     # TODO: You could construct this more intelligently per-quadrant.
-    for rel_move_x in -MOVEMENT_PER_TURN:MOVEMENT_PER_TURN
-        for rel_move_y in -MOVEMENT_PER_TURN:MOVEMENT_PER_TURN
+    for rel_move_x in -board.range:board.range
+        for rel_move_y in -board.range:board.range
             for direction in VALID_DIRECTIONS
 
                 move_candidate = GridMove(current_pos.x_position+rel_move_x,
                                           current_pos.y_position+rel_move_y, direction)
 
-                println(move_candidate)
                 b_candidate = nothing
 
                 if player == 1
                     b_candidate = GridBoard(vcat(board.p1_moves, [move_candidate]), board.p2_moves)
                 elseif player == 2
-                    println(board.p1_moves)
-                    println(vcat(board.p2_moves, [move_candidate]))
                     b_candidate = GridBoard(board.p1_moves, vcat(board.p2_moves, [move_candidate]))
                 end
 
@@ -102,7 +104,7 @@ function is_legal(board)
     end
 
     # Check move histories.
-    if !check_history(board.p1_moves) || !check_history(board.p2_moves)
+    if !check_history(board.p1_moves, board) || !check_history(board.p2_moves, board)
         return false
     end
 
@@ -112,23 +114,20 @@ function is_legal(board)
 end
 export is_legal
 
-function check_history(moves)
+function check_history(moves, board)
 
     # Per-move checks.
     for position in moves
 
         # Check out of bounds.
-        if     ~(0 ≤ position.x_position ≤ GRID_SIZE-1)
-            println("x oob")
+        if     ~(0 ≤ position.x_position ≤ board.grid_size-1)
             return false
-        elseif ~(0 ≤ position.y_position ≤ GRID_SIZE-1)
-            println("y oob")
+        elseif ~(0 ≤ position.y_position ≤ board.grid_size-1)
             return false
         end
 
         # Check that the directions are valid.
         if position.direction ∉ VALID_DIRECTIONS
-            println("direction typo")
             return false
         end
     end
@@ -145,8 +144,7 @@ function check_history(moves)
         rel_y = after_move.y_position-before_move.y_position
 
         # Check distance between moves by 1-norm.
-        if (abs(rel_x)+abs(rel_y)) > MOVEMENT_PER_TURN
-            println("direction typo")
+        if (abs(rel_x)+abs(rel_y)) > board.range
             return false
         end
 
@@ -169,7 +167,6 @@ function check_history(moves)
             end
 
             if after_move.direction ∉ compatible_directions
-                println("direction incompatible")
                 return false
             end
 
