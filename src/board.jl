@@ -192,6 +192,45 @@ end
 export up_next
 
 # # Check if the game is over. If it is over, returns the outcome.
+function is_over(board)
+    # If player i is in player j's strike zone and player j is not in player i's strike zone, then player i loses
+
+    # Current moves for both players:
+    pos_p1 = board.p1_moves[end]
+    pos_p2 = board.p2_moves[end]
+    x1 = pos_p1.x_position
+    x2 = pos_p2.x_position
+    y1 = pos_p1.y_position
+    y2 = pos_p2.y_position
+    
+    println(x1)
+    println(x2)
+    println(y1)
+    println(y2)
+    println(pos_p1.direction)
+    println(pos_p2.direction)
+    # Strike zones of each player based on their direction in current moves:
+    strikeZone_p1 = strike_zone(x1,y1,pos_p1.direction)
+    strikeZone_p2 = strike_zone(x2,y2,pos_p2.direction)
+
+    # Check conditions:
+    if [x1 y1] ∈ strikeZone_p2 && [x2 y2] ∉ strikeZone_p1
+        return true,-1
+    elseif [x1 y1] ∉ strikeZone_p2 && [x2 y2] ∈ strikeZone_p1
+        return true,1
+    elseif [x1 y1] ∈ strikeZone_p2 && [x2 y2] ∈ strikeZone_p1
+        return true,0
+    else
+        return false,NaN
+    end
+
+end
+export is_over
+
+p1_moves = [GridMove(1,3,"right"), GridMove(2,3,"right")]
+p2_moves = [GridMove(6,6,"left"), GridMove(5,6,"left")]
+b = GridBoard(p1_moves,p2_moves)
+is_over(b)
 # function is_over(b)
 
 #     # Enumerate and check horizontal wins, then vertical wins.
@@ -236,11 +275,11 @@ export up_next
 # end
 # export is_over
 
-function strike_zone(dir)
+function strike_zone(x,y,dir)
     # Strike zone is a "cone" that follows a 1-3-3-5-5 grid sequence
-    # start = [0 0]
     # dir is a string 
 
+    # Construct grid relative to [0 0] (origin)
     augmented_grid = [[ii jj] for ii ∈ 1:5, jj ∈ -2:2]
     reshape_grid = reshape(augmented_grid,(5^2,1))
     for ii ∈ 1:3
@@ -252,6 +291,7 @@ function strike_zone(dir)
             end
         end
     end
+    # Rotate grid according to strike direction
     if dir == "right"
         reshape_grid = reshape_grid
     elseif dir == "left"
@@ -261,8 +301,13 @@ function strike_zone(dir)
     elseif dir == "down"
         reshape_grid = [[point[2],-point[1]] for point ∈ reshape_grid]
     end
+
+    # Translate grid to being relative to current position of player
+    reshape_grid = [[x,y]].+reshape_grid
+
     return reshape_grid
 end
+export strike_zone
 
 # Utility for printing boards out to the terminal.
 function Base.show(io::IO, b::GridBoard)
@@ -288,8 +333,3 @@ function Base.show(io::IO, b::GridBoard)
     end
 end
 
-p1_moves = [GridMove(2,3,"right"), GridMove(4,3,"right")]
-p2_moves = [GridMove(19,17,"left" ), GridMove(17,18,"down")]
-b = GridBoard(p1_moves, p2_moves)
-
-println(b)
