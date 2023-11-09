@@ -242,12 +242,6 @@ function is_over(board)
     strikeZone_p2 = strike_zone(x2,y2,pos_p2.direction)
 
     # Check conditions:
-    condition1 = [x1 y1] ∉ strikeZone_p2
-    condition2 = [x2 y2] ∈ strikeZone_p1
-    println(condition1)
-    println(condition2)
-    println([x2 y2])
-    println(strikeZone_p1)
     if [x1 y1] ∈ strikeZone_p2 && [x2 y2] ∉ strikeZone_p1
         return true,-1
     elseif [x1 y1] ∉ strikeZone_p2 && [x2 y2] ∈ strikeZone_p1
@@ -260,11 +254,6 @@ function is_over(board)
 end
 export is_over
 
-p1_moves = [GridMove(1,3,"right"), GridMove(2,3,"right")]
-p2_moves = [GridMove(5,3,"up"), GridMove(5,4,"up")]
-b = GridBoard(p1_moves,p2_moves)
-over,result = is_over(b)
-println(over)
 # function is_over(b)
 
 #     # Enumerate and check horizontal wins, then vertical wins.
