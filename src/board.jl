@@ -7,6 +7,7 @@ export Position
 
 MOVEMENT_PER_TURN = 4
 GRID_SIZE = 20
+VALID_DIRECTIONS = ["left","right","up","down"]
 
 struct GridPosition <: Position
 
@@ -97,16 +98,23 @@ export is_legal
 
 function check_history(moves)
 
-    # Check out of bounds.
+    # Per-move checks.
     for position in moves
+
+        # Check out of bounds.
         if     ~(0 ≤ position.x_position ≤ GRID_SIZE-1)
             return false
         elseif ~(0 ≤ position.y_position ≤ GRID_SIZE-1)
             return false
         end
+
+        # Check that the directions are valid.
+        if position.direction ∉ VALID_DIRECTIONS
+            return false
+        end
     end
 
-    # Check distance between moves by 1-norm.
+    # Move-relative checks.
     for before_move_idx in 1:length(moves)-1
 
         after_move_idx = before_move_idx+1
@@ -114,19 +122,39 @@ function check_history(moves)
         before_move = moves[before_move_idx]
         after_move  = moves[ after_move_idx]
 
-        if (abs(after_move.x_position-before_move.x_position)
-            + abs(after_move.y_position-before_move.y_position)) > MOVEMENT_PER_TURN
+        # Check distance between moves by 1-norm.
+        rel_x = after_move.x_position-before_move.x_position
+        rel_y = after_move.y_position-before_move.y_position
+        if (abs(rel_x)+abs(rel_y)) > MOVEMENT_PER_TURN
             return false
         end
-    end
 
-    # Check that the directions are valid.
-    for position in moves
-        if position.direction ∉ ["left","right","up","down"]
-            return false
+        # Check that the directions match the moves made. But don't bother
+        # checking if the player stood still.
+        if !(rel_x==0 && rel_y==0)
+
+            compatible_directions = []
+            if rel_x>0
+                push!(compatible_directions, "right")
+            end
+            if rel_y>0
+                push!(compatible_directions, "up")
+            end
+            if rel_x<0
+                push!(compatible_directions, "left")
+            end
+            if rel_y<0
+                push!(compatible_directions, "down")
+            end
+
+            if after_move.direction ∉ compatible_directions
+                return false
+            end
+
         end
-    end
 
+
+    end
 
     # If all tests pass, return true.
     return true

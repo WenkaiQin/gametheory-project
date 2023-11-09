@@ -7,23 +7,37 @@ seed!(0)
 @testset "GridBoardTests" begin
     @testset "CheckBoardClassification" begin
         @testset "OutOfBounds" begin
-            p1_init = [GridPosition(-1, -1)]
-            p2_init = [GridPosition(20, 20)]
-            b = GridBoard(p1_init, p2_init)
+            p1_moves = [GridPosition(-1, -1)]
+            p2_moves = [GridPosition(20, 20)]
+            b = GridBoard(p1_moves, p2_moves)
             @test !is_legal(b)
         end # testset
 
         @testset "LongMove" begin
-            p1_init = [GridPosition(2,3), GridPosition(3,7)]
-            p2_init = [GridPosition(2,3), GridPosition(6,4)]
-            b = GridBoard(p1_init, p2_init)
+            p1_moves = [GridPosition(2,3), GridPosition(3,7)]
+            p2_moves = [GridPosition(2,3), GridPosition(6,4)]
+            b = GridBoard(p1_moves, p2_moves)
             @test !is_legal(b)
         end # testset
 
         @testset "DirectionTypo" begin
-            p1_init = [GridPosition(2,3,"elft")]
-            p2_init = [GridPosition(2,3,"rigth")]
-            b = GridBoard(p1_init, p2_init)
+            p1_moves = [GridPosition(2,3,"elft")]
+            p2_moves = [GridPosition(2,3,"rigth")]
+            b = GridBoard(p1_moves, p2_moves)
+            @test !is_legal(b)
+        end # testset
+
+        @testset "DirectionCompatibilityTrue" begin
+            p1_moves = [GridPosition(2,3,"right"), GridPosition(4,3,"right")]
+            p2_moves = [GridPosition(2,3,"left" ), GridPosition(2,2,"down" )]
+            b = GridBoard(p1_moves, p2_moves)
+            @test is_legal(b)
+        end # testset
+
+        @testset "DirectionCompatibilityFalse" begin
+            p1_moves = [GridPosition(2,3,"right"), GridPosition(4,5,"down" )]
+            p2_moves = [GridPosition(2,3,"left" ), GridPosition(1,1,"right")]
+            b = GridBoard(p1_moves, p2_moves)
             @test !is_legal(b)
         end # testset
 
