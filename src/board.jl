@@ -1,3 +1,5 @@
+# TODO: Make MOVEMENT_PER_TURN, GRID_SIZE properties of the board.
+
 # Abstract types for Board and Move.
 abstract type Board end
 export Board
@@ -9,29 +11,29 @@ MOVEMENT_PER_TURN = 4
 GRID_SIZE = 20
 VALID_DIRECTIONS = ["left","right","up","down"]
 
-struct GridPosition <: Position
+struct GridMove <: Position
 
     x_position::Int
     y_position::Int
     direction::String
 
-    function GridPosition(x_pos, y_pos, dir)
+    function GridMove(x_pos, y_pos, dir)
         new(x_pos, y_pos, dir)
     end
 
     # Assume right if no position defined.
-    function GridPosition(x_pos, y_pos)
+    function GridMove(x_pos, y_pos)
         new(x_pos, y_pos, "right")
     end
 
 
 end # struct
-export GridPosition
+export GridMove
 
 mutable struct GridBoard <: Board
 
-    p1_moves::AbstractArray{GridPosition}
-    p2_moves::AbstractArray{GridPosition}
+    p1_moves::AbstractArray{GridMove}
+    p2_moves::AbstractArray{GridMove}
 
     function GridBoard()
         new([],[])
@@ -46,36 +48,50 @@ export GridBoard
 
 
 # Enumerate all possible next moves.
-# function next_moves(b)
+function next_moves(board)
 
-#     # Pick next player.
-#     player = up_next(b)
+    # Pick next player.
+    player = up_next(board)
+    if player==1
+        current_pos = board.p1_moves[end]
+    else
+        current_pos = board.p2_moves[end]
+    end
 
-#     # Go through all possible next moves. Check at each one if the move creates a legal board.
-#     all_next_m = []
+    # Go through all possible next moves. Check at each one if the move creates a legal board.
+    all_next_m = []
 
-#     for move_ud in -MOVEMENT_PER_TURN:MOVEMENT_PER_TURN
-#         for move_lr in -MOVEMENT_PER_TURN:MOVEMENT_PER_TURN
+    # TODO: You could construct this more intelligently per-quadrant.
+    for rel_move_x in -MOVEMENT_PER_TURN:MOVEMENT_PER_TURN
+        for rel_move_y in -MOVEMENT_PER_TURN:MOVEMENT_PER_TURN
+            for direction in VALID_DIRECTIONS
 
-#             move_candidate = GridMove(row, col)
-#             b_candidate = nothing
-#             if     player == 1
-#                 b_candidate = TicTacToeBoard(vcat(b.Xs, [move_candidate]), b.Os)
-#             elseif player == 2
-#                 b_candidate = TicTacToeBoard(b.Xs, vcat(b.Os, [move_candidate]))
-#             end
+                move_candidate = GridMove(current_pos.x_position+rel_move_x,
+                                          current_pos.y_position+rel_move_y, direction)
 
-#             if is_legal(b_candidate)
-#                 push!(all_next_m, move_candidate)
-#             end
-#         end
-#     end
+                println(move_candidate)
+                b_candidate = nothing
 
-#     return all_next_m
+                if player == 1
+                    b_candidate = GridBoard(vcat(board.p1_moves, [move_candidate]), board.p2_moves)
+                elseif player == 2
+                    println(board.p1_moves)
+                    println(vcat(board.p2_moves, [move_candidate]))
+                    b_candidate = GridBoard(board.p1_moves, vcat(board.p2_moves, [move_candidate]))
+                end
 
-# end
-# export next_moves
+                if is_legal(b_candidate)
+                    push!(all_next_m, move_candidate)
+                end
 
+            end
+        end
+    end
+
+    return all_next_m
+
+end
+export next_moves
 
 # Check if the given board is legal. For now, this only checks if anyone is out of bounds.
 function is_legal(board)
@@ -85,7 +101,7 @@ function is_legal(board)
         return false
     end
 
-    # Check out of bounds.
+    # Check move histories.
     if !check_history(board.p1_moves) || !check_history(board.p2_moves)
         return false
     end
@@ -103,13 +119,16 @@ function check_history(moves)
 
         # Check out of bounds.
         if     ~(0 ≤ position.x_position ≤ GRID_SIZE-1)
+            println("x oob")
             return false
         elseif ~(0 ≤ position.y_position ≤ GRID_SIZE-1)
+            println("y oob")
             return false
         end
 
         # Check that the directions are valid.
         if position.direction ∉ VALID_DIRECTIONS
+            println("direction typo")
             return false
         end
     end
@@ -122,10 +141,12 @@ function check_history(moves)
         before_move = moves[before_move_idx]
         after_move  = moves[ after_move_idx]
 
-        # Check distance between moves by 1-norm.
         rel_x = after_move.x_position-before_move.x_position
         rel_y = after_move.y_position-before_move.y_position
+
+        # Check distance between moves by 1-norm.
         if (abs(rel_x)+abs(rel_y)) > MOVEMENT_PER_TURN
+            println("direction typo")
             return false
         end
 
@@ -148,12 +169,11 @@ function check_history(moves)
             end
 
             if after_move.direction ∉ compatible_directions
+                println("direction incompatible")
                 return false
             end
 
         end
-
-
     end
 
     # If all tests pass, return true.

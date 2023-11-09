@@ -7,36 +7,36 @@ seed!(0)
 @testset "GridBoardTests" begin
     @testset "CheckBoardClassification" begin
         @testset "OutOfBounds" begin
-            p1_moves = [GridPosition(-1, -1)]
-            p2_moves = [GridPosition(20, 20)]
+            p1_moves = [GridMove(-1, -1)]
+            p2_moves = [GridMove(20, 20)]
             b = GridBoard(p1_moves, p2_moves)
             @test !is_legal(b)
         end # testset
 
         @testset "LongMove" begin
-            p1_moves = [GridPosition(2,3), GridPosition(3,7)]
-            p2_moves = [GridPosition(2,3), GridPosition(6,4)]
+            p1_moves = [GridMove(2,3), GridMove(3,7)]
+            p2_moves = [GridMove(2,3), GridMove(6,4)]
             b = GridBoard(p1_moves, p2_moves)
             @test !is_legal(b)
         end # testset
 
         @testset "DirectionTypo" begin
-            p1_moves = [GridPosition(2,3,"elft")]
-            p2_moves = [GridPosition(2,3,"rigth")]
+            p1_moves = [GridMove(2,3,"elft")]
+            p2_moves = [GridMove(2,3,"rigth")]
             b = GridBoard(p1_moves, p2_moves)
             @test !is_legal(b)
         end # testset
 
         @testset "DirectionCompatibilityTrue" begin
-            p1_moves = [GridPosition(2,3,"right"), GridPosition(4,3,"right")]
-            p2_moves = [GridPosition(2,3,"left" ), GridPosition(2,2,"down" )]
+            p1_moves = [GridMove(2,3,"right"), GridMove(4,3,"right")]
+            p2_moves = [GridMove(2,3,"left" ), GridMove(2,2,"down" )]
             b = GridBoard(p1_moves, p2_moves)
             @test is_legal(b)
         end # testset
 
         @testset "DirectionCompatibilityFalse" begin
-            p1_moves = [GridPosition(2,3,"right"), GridPosition(4,5,"down" )]
-            p2_moves = [GridPosition(2,3,"left" ), GridPosition(1,1,"right")]
+            p1_moves = [GridMove(2,3,"right"), GridMove(4,5,"down" )]
+            p2_moves = [GridMove(2,3,"left" ), GridMove(1,1,"right")]
             b = GridBoard(p1_moves, p2_moves)
             @test !is_legal(b)
         end # testset
@@ -48,12 +48,19 @@ seed!(0)
         #     @test !is_legal(b)
         # end # testset
 
-        # @testset "UnbalancedMoves" begin
-        #     Xs = [TicTacToeMove(1, 3), TicTacToeMove(1, 2)]
-        #     Os = [TicTacToeMove(2, 2), TicTacToeMove(1, 3), TicTacToeMove(1, 1)]
-        #     b = TicTacToeBoard(Xs, Os)
-        #     @test !is_legal(b)
-        # end # testset
+        @testset "UnbalancedMoves" begin
+            p1_moves = [GridMove(1,3), GridMove(1,3)]
+            p2_moves = [GridMove(2,2), GridMove(2,2), GridMove(2,2)]
+            b = GridBoard(p1_moves, p2_moves)
+            @test !is_legal(b)
+        end # testset
+
+        @testset "NextPlayer" begin
+            p1_moves = [GridMove(1,3), GridMove(1,3)]
+            p2_moves = [GridMove(2,2), GridMove(2,2)]
+            b = GridBoard(p1_moves, p2_moves)
+            @test up_next(b)==1
+        end # testset
 
         # @testset "LegalNonTerminal" begin
         #     Xs = [TicTacToeMove(1, 3), TicTacToeMove(1, 2)]
@@ -77,26 +84,45 @@ seed!(0)
         # end # testset
     end # testset
 
-    # # Check next moves from a given board.
-    # @testset "CheckNextMoves" begin
-    #     Xs = [TicTacToeMove(1, 3), TicTacToeMove(1, 2)]
-    #     Os = [TicTacToeMove(2, 2)]
-    #     b = TicTacToeBoard(Xs, Os)
+    # Check next moves from a given board.
+    @testset "CheckNextMoves" begin
+        p1_moves = [GridMove(1,3), GridMove(1,4,"up")]
+        p2_moves = [GridMove(2,2)]
+        b = GridBoard(p1_moves, p2_moves)
 
-    #     moves = next_moves(b)
-    #     correct_moves = [
-    #         TicTacToeMove(1, 1), TicTacToeMove(2, 1), TicTacToeMove(2, 3),
-    #         TicTacToeMove(3, 1), TicTacToeMove(3, 2), TicTacToeMove(3, 3)
-    #     ]
+        moves = next_moves(b)
+        correct_moves = [
+            GridMove(0, 0, "left" ), GridMove(0, 0, "down" ), GridMove(1, 0, "left" ),
+            GridMove(1, 0, "down" ), GridMove(2, 0, "down" ), GridMove(3, 0, "right"),
+            GridMove(3, 0, "down" ), GridMove(4, 0, "right"), GridMove(4, 0, "down" ),
+            GridMove(0, 1, "left" ), GridMove(0, 1, "down" ), GridMove(1, 1, "left" ),
+            GridMove(1, 1, "down" ), GridMove(2, 1, "down" ), GridMove(3, 1, "right"),
+            GridMove(3, 1, "down" ), GridMove(4, 1, "right"), GridMove(4, 1, "down" ),
+            GridMove(5, 1, "right"), GridMove(5, 1, "down" ), GridMove(0, 2, "left" ),
+            GridMove(1, 2, "left" ), GridMove(2, 2, "left" ), GridMove(2, 2, "right"),
+            GridMove(2, 2, "up"   ), GridMove(2, 2, "down" ), GridMove(3, 2, "right"),
+            GridMove(4, 2, "right"), GridMove(5, 2, "right"), GridMove(6, 2, "right"),
+            GridMove(0, 3, "left" ), GridMove(0, 3, "up"   ), GridMove(1, 3, "left" ),
+            GridMove(1, 3, "up"   ), GridMove(2, 3, "up"   ), GridMove(3, 3, "right"),
+            GridMove(3, 3, "up"   ), GridMove(4, 3, "right"), GridMove(4, 3, "up"   ),
+            GridMove(5, 3, "right"), GridMove(5, 3, "up"   ), GridMove(0, 4, "left" ),
+            GridMove(0, 4, "up"   ), GridMove(1, 4, "left" ), GridMove(1, 4, "up"   ),
+            GridMove(2, 4, "up"   ), GridMove(3, 4, "right"), GridMove(3, 4, "up"   ),
+            GridMove(4, 4, "right"), GridMove(4, 4, "up"   ), GridMove(1, 5, "left" ),
+            GridMove(1, 5, "up"   ), GridMove(2, 5, "up"   ), GridMove(3, 5, "right"),
+            GridMove(3, 5, "up"   ), GridMove(2, 6, "up"   )
+        ]
 
-    #     for m ∈ moves
-    #         @test m ∈ correct_moves
-    #     end
+        for m ∈ moves
+            @test m ∈ correct_moves
+        end
 
-    #     for m̂ ∈ correct_moves
-    #         @test m̂ ∈ moves
-    #     end
-    # end # testset
+        for m̂ ∈ correct_moves
+            @test m̂ ∈ moves
+        end
+
+    end # testset
+
 end # testset
 
 
