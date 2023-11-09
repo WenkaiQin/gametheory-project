@@ -7,8 +7,8 @@ seed!(0)
 @testset "GridBoardTests" begin
     @testset "CheckBoardClassification" begin
         @testset "OutOfBounds" begin
-            p1_init = GridPosition(-1, -1)
-            p2_init = GridPosition(20, 20)
+            p1_init = [GridPosition(-1, -1), GridPosition(-1, -1)]
+            p2_init = [GridPosition(20, 20), GridPosition(20, 20)]
             b = GridBoard(p1_init, p2_init)
             @test !is_legal(b)
         end # testset
