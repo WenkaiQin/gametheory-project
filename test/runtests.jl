@@ -41,13 +41,6 @@ seed!(0)
             @test !is_legal(b)
         end # testset
 
-        # @testset "RepeatedMove" begin
-        #     Xs = [TicTacToeMove(1, 3), TicTacToeMove(1, 2)]
-        #     Os = [TicTacToeMove(2, 2), TicTacToeMove(1, 3)]
-        #     b = TicTacToeBoard(Xs, Os)
-        #     @test !is_legal(b)
-        # end # testset
-
         @testset "UnbalancedMoves" begin
             p1_moves = [GridMove(1,3), GridMove(1,3)]
             p2_moves = [GridMove(2,2), GridMove(2,2), GridMove(2,2)]

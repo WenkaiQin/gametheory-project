@@ -236,20 +236,32 @@ export up_next
 # end
 # export is_over
 
-# # Utility for printing boards out to the terminal.
-# function Base.show(io::IO, b::TicTacToeBoard)
-#     for ii in 1:3
-#         for jj in 1:3
-#             m = GridMove(ii, jj)
-#             if m ∈ b.Xs
-#                 print(" X ")
-#             elseif m ∈ b.Os
-#                 print(" O ")
-#             else
-#                 print(" - ")
-#             end
-#         end
+# Utility for printing boards out to the terminal.
+function Base.show(io::IO, b::GridBoard)
+    for x in 0:b.grid_size-1
+        for y in 0:b.grid_size-1
+            m = GridMove(x, y)
 
-#         println()
-#     end
-# end
+            p1_positions = [GridMove(p1_move.x_position, p1_move.y_position)
+                                for p1_move in p1_moves]
+            p2_positions = [GridMove(p2_move.x_position, p2_move.y_position)
+                                for p2_move in p2_moves]
+
+            if m ∈ p1_positions
+                print(" 1 ")
+            elseif m ∈ p2_positions
+                print(" 2 ")
+            else
+                print(" . ")
+            end
+        end
+
+        println()
+    end
+end
+
+p1_moves = [GridMove(2,3,"right"), GridMove(4,3,"right")]
+p2_moves = [GridMove(19,17,"left" ), GridMove(17,18,"down")]
+b = GridBoard(p1_moves, p2_moves)
+
+println(b)
