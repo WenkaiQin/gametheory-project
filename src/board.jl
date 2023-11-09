@@ -9,6 +9,8 @@ DEFAULT_GRID_SIZE = 20
 DEFAULT_RANGE = 4
 VALID_DIRECTIONS = ["left","right","up","down"]
 
+# TODO: Change position to vectors so we can do vector arithmetic.
+
 struct GridMove <: Position
 
     x_position::Int
@@ -201,6 +203,7 @@ function is_over(board)
 
     # if p1 inside p2, set p1_won true
     # true
+    board.p1_moves[end].direction
 
     # Check if player 2 is in player 1's strike zone, and vice versa.
     # If both are true, then there is a tie.

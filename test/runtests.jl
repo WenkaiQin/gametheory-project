@@ -55,16 +55,16 @@ seed!(0)
             @test up_next(b)==1
         end # testset
 
-        # @testset "LegalNonTerminal" begin
-        #     Xs = [TicTacToeMove(1, 3), TicTacToeMove(1, 2)]
-        #     Os = [TicTacToeMove(2, 2), TicTacToeMove(2, 3)]
-        #     b = TicTacToeBoard(Xs, Os)
-        #     @test is_legal(b)
-        #     @test up_next(b) == 1
+        @testset "LegalNonTerminal" begin
+            p1_moves = [GridMove(2,3,"right")]
+            p2_moves = [GridMove(2,3,"left" )]
+            b = GridBoard(p1_moves, p2_moves)
+            @test is_legal(b)
+            @test up_next(b) == 1
 
-        #     over, result = is_over(b)
-        #     @test !over
-        # end # testset
+            over, result = is_over(b)
+            @test !over
+        end # testset
 
         # @testset "LegalTerminal" begin
         #     Xs = [TicTacToeMove(1, 3), TicTacToeMove(1, 2), TicTacToeMove(1, 1)]
@@ -75,6 +75,7 @@ seed!(0)
         #    over, result = is_over(b)
         #    @test over
         # end # testset
+
     end # testset
 
     # Check next moves from a given board.
