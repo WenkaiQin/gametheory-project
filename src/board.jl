@@ -9,8 +9,21 @@ MOVEMENT_PER_TURN = 4
 GRID_SIZE = 20
 
 struct GridPosition <: Position
+
     x_position::Int
     y_position::Int
+    direction::String
+
+    function GridPosition(x_pos, y_pos, dir)
+        new(x_pos, y_pos, dir)
+    end
+
+    # Assume right if no position defined.
+    function GridPosition(x_pos, y_pos)
+        new(x_pos, y_pos, "right")
+    end
+
+
 end # struct
 export GridPosition
 
@@ -19,19 +32,17 @@ mutable struct GridBoard <: Board
     p1_moves::AbstractArray{GridPosition}
     p2_moves::AbstractArray{GridPosition}
 
-    # function GridBoard()
-    #     new([],[])
-    # end
+    function GridBoard()
+        new([],[])
+    end
 
-    # function GridBoard(p1_ms, p2_ms)
-    #     new(p1_ms, p2_ms)
-    # end
+    function GridBoard(p1_ms, p2_ms)
+        new(p1_ms, p2_ms)
+    end
 
 end # struct
-
-# Initialize to starting with no history and the following moves.
-GridBoard() = GridBoard([], [])
 export GridBoard
+
 
 # Enumerate all possible next moves.
 # function next_moves(b)
@@ -74,8 +85,7 @@ function is_legal(board)
     end
 
     # Check out of bounds.
-    histories = [board.p1_moves; board.p2_moves]
-    if !check_history(board.p1_moves) || !check_history(p2_moves)
+    if !check_history(board.p1_moves) || !check_history(board.p2_moves)
         return false
     end
 
@@ -106,10 +116,20 @@ function check_history(moves)
 
         if (abs(after_move.x_position-before_move.x_position)
             + abs(after_move.y_position-before_move.y_position)) > MOVEMENT_PER_TURN
-        return false
+            return false
+        end
     end
 
-end
+    # Check that the directions are valid.
+    for position in moves
+        if position.direction ∉ ["left","right","up","down"]
+            return false
+        end
+    end
+
+
+    # If all tests pass, return true.
+    return true
 
 end
 export check_history

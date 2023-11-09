@@ -20,6 +20,13 @@ seed!(0)
             @test !is_legal(b)
         end # testset
 
+        @testset "DirectionTypo" begin
+            p1_init = [GridPosition(2,3,"elft")]
+            p2_init = [GridPosition(2,3,"rigth")]
+            b = GridBoard(p1_init, p2_init)
+            @test !is_legal(b)
+        end # testset
+
         # @testset "RepeatedMove" begin
         #     Xs = [TicTacToeMove(1, 3), TicTacToeMove(1, 2)]
         #     Os = [TicTacToeMove(2, 2), TicTacToeMove(1, 3)]
