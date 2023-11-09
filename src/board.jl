@@ -15,7 +15,6 @@ struct GridMove <: Position
     y_position::Int
     direction::String
 
-
     function GridMove(x_pos, y_pos, dir)
         new(x_pos, y_pos, dir)
     end
@@ -191,50 +190,33 @@ function up_next(board)
 end
 export up_next
 
-# # Check if the game is over. If it is over, returns the outcome.
-# function is_over(b)
+# Check if the game is over. If it is over, returns the outcome.
+function is_over(board)
 
-#     # Enumerate and check horizontal wins, then vertical wins.
-#     for i in 1:3
-#         winning_row = Set()
-#         winning_col = Set()
-#         for j in 1:3
-#             push!(winning_row, GridMove(i,j))
-#             push!(winning_col, GridMove(j,i))
-#         end
+    # Placeholder values.
+    p1_won = false
+    p2_won = false
 
-#         if     winning_row ⊆ Set(b.Xs) || winning_col ⊆ Set(b.Xs)
-#             return true, -1
-#         elseif winning_row ⊆ Set(b.Os) || winning_col ⊆ Set(b.Os)
-#             return true, 1
-#         end
-#     end
+    # Use each player's current position and strike zone shape to determine the strike zone on the grid.
 
-#     # Now, diagonals.
-#     winning_diag_L = Set()
-#     winning_diag_R = Set()
+    # if p1 inside p2, set p1_won true
+    # true
 
-#     for i in 1:3
-#         push!(winning_diag_L, GridMove(i,  i))
-#         push!(winning_diag_R, GridMove(i,4-i))
-#     end
+    # Check if player 2 is in player 1's strike zone, and vice versa.
+    # If both are true, then there is a tie.
+    if p1_won && p2_won
+        return true, 0
+    elseif p1_won
+        return true, 1
+    elseif p2_won
+        return true, -1
+    end
 
-#     if     winning_diag_L ⊆ Set(b.Xs) ||  winning_diag_R ⊆ Set(b.Xs)
-#         return true, -1
-#     elseif winning_diag_L ⊆ Set(b.Os) ||  winning_diag_R ⊆ Set(b.Os)
-#         return true, 1
-#     end
+    # If no ending states detected, the game is not over yet.
+    return false, NaN
 
-#     # Check for ties.
-#     if length(b.Xs) + length(b.Os) ≥ 9
-#         return true, 0
-#     end
-
-#     # If no ending states detected, the game is not over yet.
-#     return false, NaN
-
-# end
-# export is_over
+end
+export is_over
 
 # Utility for printing boards out to the terminal.
 function Base.show(io::IO, b::GridBoard)
@@ -242,10 +224,8 @@ function Base.show(io::IO, b::GridBoard)
         for y in 0:b.grid_size-1
             m = GridMove(x, y)
 
-            p1_positions = [GridMove(p1_move.x_position, p1_move.y_position)
-                                for p1_move in p1_moves]
-            p2_positions = [GridMove(p2_move.x_position, p2_move.y_position)
-                                for p2_move in p2_moves]
+            p1_positions = [GridMove(p1_move.x_position, p1_move.y_position) for p1_move in p1_moves]
+            p2_positions = [GridMove(p2_move.x_position, p2_move.y_position) for p2_move in p2_moves]
 
             if m ∈ p1_positions
                 print(" 1 ")
