@@ -241,7 +241,6 @@ function strike_zone(dir)
     # start = [0 0]
     # dir is a string 
 
-
     augmented_grid = [[ii jj] for ii ∈ 1:5, jj ∈ -2:2]
     reshape_grid = reshape(augmented_grid,(5^2,1))
     for ii ∈ 1:3
@@ -253,8 +252,17 @@ function strike_zone(dir)
             end
         end
     end
+    if dir == "right"
+        reshape_grid = reshape_grid
+    elseif dir == "left"
+        reshape_grid = [[-point[1],point[2]] for point ∈ reshape_grid]
+    elseif dir == "up"
+        reshape_grid = [[point[2],point[1]] for point ∈ reshape_grid]
+    elseif dir == "down"
+        reshape_grid = [[point[2],-point[1]] for point ∈ reshape_grid]
+    end
+    return reshape_grid
 end
-
 
 # Utility for printing boards out to the terminal.
 function Base.show(io::IO, b::GridBoard)
