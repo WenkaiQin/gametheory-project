@@ -1,6 +1,6 @@
-name = "Assignment3"
-uuid = "9c604635-1385-46f0-8a51-c9e1651f4fd6"
-authors = ["David Fridovich-Keil <dfk@utexas.edu>"]
+name = "gametheory_project"
+uuid = "6c351062-e288-44b6-baad-5f38568d8823"
+authors = ["Wenkai Qin <wqin@utexas.edu", "Jad Bourjeili <jadbourjeili@utexas.edu>"]
 version = "0.1.0"
 
 [deps]

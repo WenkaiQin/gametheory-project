@@ -1,4 +1,4 @@
-module Assignment3
+module gametheory_project
 
 include("board.jl")
 include("node.jl")
