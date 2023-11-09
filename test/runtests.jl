@@ -7,18 +7,18 @@ seed!(0)
 @testset "GridBoardTests" begin
     @testset "CheckBoardClassification" begin
         @testset "OutOfBounds" begin
-            p1_init = [GridPosition(-1, -1), GridPosition(-1, -1)]
-            p2_init = [GridPosition(20, 20), GridPosition(20, 20)]
+            p1_init = [GridPosition(-1, -1)]
+            p2_init = [GridPosition(20, 20)]
             b = GridBoard(p1_init, p2_init)
             @test !is_legal(b)
         end # testset
 
-        # @testset "LongMove" begin
-        #     Xs = [TicTacToeMove(1, 3), TicTacToeMove(2, 5)]
-        #     Os = [TicTacToeMove(1, 2), TicTacToeMove(3, 1)]
-        #     b = TicTacToeBoard(Xs, Os)
-        #     @test !is_legal(b)
-        # end # testset
+        @testset "LongMove" begin
+            p1_init = [GridPosition(2,3), GridPosition(3,7)]
+            p2_init = [GridPosition(2,3), GridPosition(6,4)]
+            b = GridBoard(p1_init, p2_init)
+            @test !is_legal(b)
+        end # testset
 
         # @testset "RepeatedMove" begin
         #     Xs = [TicTacToeMove(1, 3), TicTacToeMove(1, 2)]

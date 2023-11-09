@@ -99,7 +99,7 @@ function check_history(moves)
     # Check distance between moves by 1-norm.
     for before_move_idx in 1:length(moves)-1
 
-        after_move = before_move_idx+1
+        after_move_idx = before_move_idx+1
 
         before_move = moves[before_move_idx]
         after_move  = moves[ after_move_idx]
