@@ -36,14 +36,20 @@ mutable struct GridBoard <: Board
     grid_size::Int
     range::Int
 
-    function GridBoard(p1_ms, p2_ms, g_size, rng)
-        new(p1_ms, p2_ms, g_size, rng)
+    function GridBoard(p1_ms, p2_ms, g_size, ran)
+        new(p1_ms, p2_ms, g_size, ran)
     end
 
     function GridBoard()
-        new([GridMove(0,0)],
-            [GridMove(DEFAULT_BOARD_SIZE-1,DEFAULT_BOARD_SIZE-1)],
+        new([GridMove(0,0,"right")],
+            [GridMove(DEFAULT_BOARD_SIZE-1,DEFAULT_BOARD_SIZE-1,"left")],
             DEFAULT_BOARD_SIZE, DEFAULT_RANGE)
+    end
+
+    function GridBoard(g_size, ran)
+        new([GridMove(0,0,"right")],
+            [GridMove(DEFAULT_BOARD_SIZE-1,DEFAULT_BOARD_SIZE-1,"left")],
+            g_size, ran)
     end
 
     function GridBoard(p1_ms, p2_ms)
@@ -262,8 +268,16 @@ export is_over
 # Utility for printing boards out to the terminal.
 function Base.show(io::IO, board::GridBoard)
 
-    for x in 0:board.grid_size-1
-        for y in 0:board.grid_size-1
+    border_base = repeat("━", 3*board.grid_size)
+    top_border = "┏"*border_base*"┓"
+    bot_border = "┗"*border_base*"┛"
+
+    println(top_border)
+
+    for y in 0:board.grid_size-1
+        print("┃")
+
+        for x in 0:board.grid_size-1
 
             m = GridMove(x, y)
 
@@ -275,17 +289,35 @@ function Base.show(io::IO, board::GridBoard)
             p1_positions = [GridMove(board.p1_moves[end].x_position, board.p1_moves[end].y_position)]
             p2_positions = [GridMove(board.p2_moves[end].x_position, board.p2_moves[end].y_position)]
 
-            if m ∈ p1_positions
-                print(" 1 ")
-            elseif m ∈ p2_positions
-                print(" 2 ")
-            else
-                print(" . ")
-            end
-        end
+            p1_strike = strike_zone(board.p1_moves[end].x_position,
+                                    board.p1_moves[end].y_position,
+                                    board.p1_moves[end].direction)
+            p2_strike = strike_zone(board.p2_moves[end].x_position,
+                                    board.p2_moves[end].y_position,
+                                    board.p2_moves[end].direction)
 
+            # TODO: Make a conversion from [x,y] to GridMove.
+            if m ∈ p1_positions
+                printstyled(" 1 "; color = :red)
+            elseif m ∈ p2_positions
+                printstyled(" 2 "; color = :blue)
+            elseif [x y] ∈ p1_strike && [x y] ∈ p2_strike
+                printstyled(" ½ "; color = :magenta)
+            elseif [x y] ∈ p1_strike
+                printstyled(" ₁ "; color = :red)
+            elseif [x y] ∈ p2_strike
+                printstyled(" ₂ "; color = :blue)
+            else
+                print("   ")
+            end
+        end # end for x
+        print("┃")
         println()
 
-    end
+    end # end for y
+
+    println(bot_border)
+
+
 end
 

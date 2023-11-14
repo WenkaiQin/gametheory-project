@@ -71,7 +71,6 @@ seed!(0)
             b = GridBoard(p1_moves,p2_moves)
             @test is_legal(b)
             over,result = is_over(b)
-            println(over)
             @test over
         end # testset
     end # testset
@@ -80,7 +79,7 @@ seed!(0)
     @testset "CheckNextMoves" begin
         p1_moves = [GridMove(1,3), GridMove(1,4,"up")]
         p2_moves = [GridMove(2,2)]
-        b = GridBoard(p1_moves, p2_moves, 20, 4)
+        b = GridBoard(p1_moves, p2_moves, 5, 4)
 
         moves = next_moves(b)
         correct_moves = [
@@ -206,8 +205,8 @@ end # testset
         total_value1 = 0
         total_value2 = 0
         for ii in 1:100
-            total_value1 += play_game(T1 = 2.0, T2 = 2.1)
-            total_value2 += play_game(T1 = 2.1, T2 = 2.0)
+            total_value1 += play_game(T1 = 0.1, T2 = 5)
+            total_value2 += play_game(T1 = 2.1, T2 = 0.1)
         end
 
         println("total_value1=$total_value1")
