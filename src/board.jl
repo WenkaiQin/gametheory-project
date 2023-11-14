@@ -5,7 +5,7 @@ export Board
 abstract type Position end
 export Position
 
-DEFAULT_GRID_SIZE = 20
+DEFAULT_BOARD_SIZE = 20
 DEFAULT_RANGE = 4
 VALID_DIRECTIONS = ["left","right","up","down"]
 
@@ -41,11 +41,13 @@ mutable struct GridBoard <: Board
     end
 
     function GridBoard()
-        new([], [], DEFAULT_GRID_SIZE, DEFAULT_RANGE)
+        new([GridMove(0,0)],
+            [GridMove(DEFAULT_BOARD_SIZE-1,DEFAULT_BOARD_SIZE-1)],
+            DEFAULT_BOARD_SIZE, DEFAULT_RANGE)
     end
 
     function GridBoard(p1_ms, p2_ms)
-        new(p1_ms, p2_ms, DEFAULT_GRID_SIZE, DEFAULT_RANGE)
+        new(p1_ms, p2_ms, DEFAULT_BOARD_SIZE, DEFAULT_RANGE)
     end
 
 end # struct
@@ -225,13 +227,16 @@ function strike_zone(x,y,dir)
 end
 export strike_zone
 
-# # Check if the game is over. If it is over, returns the outcome.
+# Check if the game is over. If it is over, returns the outcome.
 function is_over(board)
-    # If player i is in player j's strike zone and player j is not in player i's strike zone, then player i loses
+
+    # If player i is in player j's strike zone and player j is not in player
+    # i's strike zone, then player i loses.
 
     # Current moves for both players:
     pos_p1 = board.p1_moves[end]
     pos_p2 = board.p2_moves[end]
+
     x1 = pos_p1.x_position
     x2 = pos_p2.x_position
     y1 = pos_p1.y_position
@@ -255,15 +260,20 @@ end
 export is_over
 
 # Utility for printing boards out to the terminal.
-function Base.show(io::IO, b::GridBoard)
-    for x in 0:b.grid_size-1
-        for y in 0:b.grid_size-1
+function Base.show(io::IO, board::GridBoard)
+
+    for x in 0:board.grid_size-1
+        for y in 0:board.grid_size-1
+
             m = GridMove(x, y)
 
-            p1_positions = [GridMove(p1_move.x_position, p1_move.y_position)
-                                for p1_move in p1_moves]
-            p2_positions = [GridMove(p2_move.x_position, p2_move.y_position)
-                                for p2_move in p2_moves]
+            # p1_positions = [GridMove(p1_move.x_position, p1_move.y_position)
+            #                     for p1_move in board.p1_moves]
+            # p2_positions = [GridMove(p2_move.x_position, p2_move.y_position)
+            #                     for p2_move in board.p2_moves]
+
+            p1_positions = [GridMove(board.p1_moves[end].x_position, board.p1_moves[end].y_position)]
+            p2_positions = [GridMove(board.p2_moves[end].x_position, board.p2_moves[end].y_position)]
 
             if m ∈ p1_positions
                 print(" 1 ")
@@ -275,7 +285,7 @@ function Base.show(io::IO, b::GridBoard)
         end
 
         println()
-        
+
     end
 end
 

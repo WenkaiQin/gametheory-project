@@ -65,16 +65,6 @@ seed!(0)
             @test !over
         end
 
-        #     Xs = [TicTacToeMove(1, 3), TicTacToeMove(1, 2)]
-        #     Os = [TicTacToeMove(2, 2), TicTacToeMove(2, 3)]
-        #     b = TicTacToeBoard(Xs, Os)
-        #     @test is_legal(b)
-        #     @test up_next(b) == 1
-
-        #     over, result = is_over(b)
-        #     @test !over
-        # end # testset
-
         @testset "LegalTerminal" begin
             p1_moves = [GridMove(1,3,"right"), GridMove(2,3,"right")]
             p2_moves = [GridMove(5,3,"up"), GridMove(5,4,"up")]
@@ -83,15 +73,7 @@ seed!(0)
             over,result = is_over(b)
             println(over)
             @test over
-        end
-        #     Xs = [TicTacToeMove(1, 3), TicTacToeMove(1, 2), TicTacToeMove(1, 1)]
-        #     Os = [TicTacToeMove(2, 2), TicTacToeMove(2, 3)]
-        #     b = TicTacToeBoard(Xs, Os)
-        #     @test is_legal(b)
-        #
-        #    over, result = is_over(b)
-        #    @test over
-        # end # testset
+        end # testset
     end # testset
 
     # Check next moves from a given board.
@@ -138,8 +120,8 @@ end # testset
 
 @testset "MCTSTests" begin
 #     # Create a tree to use for these tests.
-    b₀ = GridBoard()
-    root = construct_search_tree(b₀, T = 0.1)
+    board₀ = GridBoard()
+    root = construct_search_tree(board₀, T = 0.1)
 
     @testset "CheckValidTree" begin
         # Walk tree with depth-first-search and check consistency.
@@ -183,45 +165,33 @@ end # testset
     @testset "CheckFindLeaf" begin
         n = find_leaf(root, upper_confidence_strategy)
         @test isempty(n.children) ||
-            length(n.children) < length(next_moves(n.b))
+            length(n.children) < length(next_moves(n.board))
     end
-
-    # NOTE: It turns out that *any* first move results in a draw if both
-    # players act optimally. Playing one of the moves listed here is "best" in
-    # the sense that it allows P1 to win if P2 messes up on the next move.
-    # @testset "CheckReasonableMove" begin
-    #     reasonable_first_moves = [
-    #         TicTacToeMove(1, 1), TicTacToeMove(1, 3), TicTacToeMove(3, 1),
-    #         TicTacToeMove(3, 3), TicTacToeMove(2, 2)
-    #     ]
-
-    #     # Find the UCT move and confirm it is reasonable.
-    #     next_node = upper_confidence_strategy(root)
-    #     @test only(next_node.b.Xs) in reasonable_first_moves
-    # end
 
     @testset "CheckMoreTimeIsBetter" begin
         # Helper function to return the result of playing MCTS with T = T1 vs.
         # MCTS with T = T2.
         function play_game(; T1, T2)
-            b = TicTacToeBoard()
+            board = GridBoard()
 
             result = 0
             while true
                 # P1 turn.
-                root = construct_search_tree(b, T = T1)
-                b = upper_confidence_strategy(root).b
+                root = construct_search_tree(board, T = T1)
+                board = upper_confidence_strategy(root).board
+                println(board)
 
-                over, result = is_over(b)
+                over, result = is_over(board)
                 if over
                     break
                 end
 
                 # P2 turn.
-                root = construct_search_tree(b, T = T2)
-                b = upper_confidence_strategy(root).b
+                root = construct_search_tree(board, T = T2)
+                board = upper_confidence_strategy(root).board
+                println(board)
 
-                over, result = is_over(b)
+                over, result = is_over(board)
                 if over
                     break
                 end
@@ -234,8 +204,8 @@ end # testset
         total_value1 = 0
         total_value2 = 0
         for ii in 1:100
-            total_value1 += play_game(T1 = 0.001, T2 = 0.0001)
-            total_value2 += play_game(T1 = 0.0001, T2 = 0.001)
+            total_value1 += play_game(T1 = 2.0, T2 = 2.1)
+            total_value2 += play_game(T1 = 2.1, T2 = 2.0)
         end
 
         println("total_value1=$total_value1")

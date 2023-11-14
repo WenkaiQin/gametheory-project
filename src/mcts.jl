@@ -2,35 +2,35 @@
 # # Should accept an optional argument T which specifies the number of seconds
 # # spent in tree construction.
 # # For reference: https://en.wikipedia.org/wiki/Monte_Carlo_tree_search
-function construct_search_tree(b::GridBoard; T = 1)
+function construct_search_tree(board::GridBoard; T = 1)
     start_time = time()
 
     # Create a root node for the tree from this board state.
-    root = Node(b)
+    root = Node(board)
 
     # Check if there's still time left on the clock.
     while time() - start_time < T
         # Find a leaf of the tree using UCT.
         leaf = find_leaf(root, upper_confidence_strategy)
-        over, result = is_over(leaf.b)
+        over, result = is_over(leaf.board)
         if over
             backpropagate!(leaf, result)
         else
             # Not over yet, so add a new child (via rejection sampling) at random.
-            ms = next_moves(leaf.b)
+            ms = next_moves(leaf.board)
             m = rand(ms)
             while haskey(leaf.children, m)
                 m = rand(ms)
             end
-            child = Node(deepcopy(leaf.b), parent = leaf)
+            child = Node(deepcopy(leaf.board), parent = leaf)
             push!(leaf.children, m => child)
 
-            turn = up_next(leaf.b)
+            turn = up_next(leaf.board)
             if turn == 1
                 # X is up.
-                push!(child.b.p1_moves, m)
+                push!(child.board.p1_moves, m)
             else
-                push!(child.b.p2_moves, m)
+                push!(child.board.p2_moves, m)
             end
 
             # Simulate until at a terminal state.
@@ -45,8 +45,8 @@ function construct_search_tree(b::GridBoard; T = 1)
 end
 export construct_search_tree
 
-# # Upper confidence strategy. Takes in a set of Nodes and returns one
-# # consistent with the UCT rule (see earlier reference for details).
+# Upper confidence strategy. Takes in a set of Nodes and returns one
+# consistent with the UCT rule (see earlier reference for details).
 function upper_confidence_strategy(node)
 
     c = √2
@@ -57,16 +57,16 @@ function upper_confidence_strategy(node)
         error("No child nodes available.")
     end
 
-#     # Find the next best child node to explore by UCT heuristic.
+    # Find the next best child node to explore by UCT heuristic.
     optimal_child = nothing
     for (move, child) ∈ node.children
 
         # Find UCT value.
-        player = up_next(node.b)
+        player = up_next(node.board)
         uct_val = (-1)^player*child.total_value/child.num_episodes
                    + c*√(log(node.num_episodes)/child.num_episodes)
 
-#         # Check for new maximum.
+        # Check for new maximum.
         if uct_val > max_uct_val
             max_uct_val = uct_val
             optimal_child = child
@@ -74,58 +74,58 @@ function upper_confidence_strategy(node)
 
     end
 
-#     # Return the node corresponding to the optimal move.
+    # Return the node corresponding to the optimal move.
     return optimal_child
 
 end
 export upper_confidence_strategy
 
-# # Walk the tree to find a leaf Node, choosing children at each level according
-# # to the function provided, whose signature is Foo(Node)::Node,
-# # such as the upper_confidence_strategy.
+# Walk the tree to find a leaf Node, choosing children at each level according
+# to the function provided, whose signature is Foo(Node)::Node,
+# such as the upper_confidence_strategy.
 function find_leaf(root, strategy)
 
     curr_node = root
     while true
 
-#         # Check if each node is a leaf. If so, return.
-        over, ~ = is_over(curr_node.b)
+        # Check if each node is a leaf. If so, return.
+        over, ~ = is_over(curr_node.board)
         if over
             return curr_node
         end
 
-        num_moves = length(next_moves(curr_node.b))
+        num_moves = length(next_moves(curr_node.board))
         num_children = length(curr_node.children)
         if num_children < num_moves
             return curr_node
         end
 
-#         # If not, continue to traverse tree according to the strategy.
+        # If not, continue to traverse tree according to the strategy.
         curr_node = strategy(curr_node)
 
     end
 end
 export find_leaf
 
-# # Simulate gameplay from the given (leaf) node.
+# Simulate gameplay from the given (leaf) node.
 function simulate(node)
 
-    b = node.b
-    over, result = is_over(b)
+    board = node.board
+    over, result = is_over(board)
 
-#     # Find all possible next moves, and then pick a random one. Repeat until
-#     # the game is over.
+    # Find all possible next moves, and then pick a random one. Repeat until
+    # the game is over.
     while !over
-        moves = next_moves(b)
+        moves = next_moves(board)
         rand_move = rand(moves)
-        if up_next(b) == 1
-            b = GridBoard(vcat(board.p1_moves,[rand_move]),board.p2_moves)
+        if up_next(board) == 1
+            board = GridBoard(vcat(board.p1_moves,[rand_move]),board.p2_moves)
         else
-            b = GridBoard(board.p1_moves,vcat(board.p2_moves,[rand_move]))
+            board = GridBoard(board.p1_moves,vcat(board.p2_moves,[rand_move]))
         end
 
-#         # Check over, get result.
-        over, result = is_over(b)
+        # Check over, get result.
+        over, result = is_over(board)
     end
 
     return result
@@ -147,18 +147,18 @@ export backpropagate!
 # # Play a game! Parameterized by time given to the CPU. Assumes CPU plays first.
 # export play_game
 # function play_game(; T = 0.1)
-#     b = TicTacToeBoard()
+#     board = TicTacToeBoard()
 
 #     result = 0
 #     while true
 #         # CPU's turn.
-#         root = construct_search_tree(b, T = T)
-#         b = upper_confidence_strategy(root).b
+#         root = construct_search_tree(board, T = T)
+#         board = upper_confidence_strategy(root).board
 
 #         # Display board.
-#         println(b)
+#         println(board)
 
-#         over, result = is_over(b)
+#         over, result = is_over(board)
 #         if over
 #             break
 #         end
@@ -171,10 +171,10 @@ export backpropagate!
 
 #         # Construct next board state and repeat.
 #         m = TicTacToeMove(row, col)
-#         push!(b.Os, m)
-#         @assert is_legal(b)
+#         push!(board.Os, m)
+#         @assert is_legal(board)
 
-#         over, result = is_over(b)
+#         over, result = is_over(board)
 #         if over
 #             break
 #         end
