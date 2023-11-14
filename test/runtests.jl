@@ -136,49 +136,49 @@ seed!(0)
 end # testset
 
 
-# @testset "MCTSTests" begin
+@testset "MCTSTests" begin
 #     # Create a tree to use for these tests.
-#     b₀ = TicTacToeBoard()
-#     root = construct_search_tree(b₀, T = 0.1)
+    b₀ = GridBoard()
+    root = construct_search_tree(b₀, T = 0.1)
 
-#     @testset "CheckValidTree" begin
-#         # Walk tree with depth-first-search and check consistency.
-#         # Recursive implementation of depth-first-search.
-#         visited = Set()
-#         function dfs(n::Node)
-#             # Checks:
-#             # (1) Ensure that n is the parent of all its children.
-#             @test isempty(n.children) ||
-#                 all(n == c.parent for (m, c) in n.children)
+    @testset "CheckValidTree" begin
+        # Walk tree with depth-first-search and check consistency.
+        # Recursive implementation of depth-first-search.
+        visited = Set()
+        function dfs(n::Node)
+            # Checks:
+            # (1) Ensure that n is the parent of all its children.
+            @test isempty(n.children) ||
+                all(n == c.parent for (m, c) in n.children)
 
-#             # (2) Ensure that the number of episodes passing through this node
-#             #     is the sum of those for all children.
-#             @test isempty(n.children) ||
-#                 (n != root &&
-#                 n.num_episodes == 1 + sum(
-#                     c.num_episodes for (m, c) in n.children)) ||
-#                 (n == root &&
-#                 n.num_episodes == sum(
-#                     c.num_episodes for (m, c) in n.children))
+            # (2) Ensure that the number of episodes passing through this node
+            #     is the sum of those for all children.
+            @test isempty(n.children) ||
+                (n != root &&
+                n.num_episodes == 1 + sum(
+                    c.num_episodes for (m, c) in n.children)) ||
+                (n == root &&
+                n.num_episodes == sum(
+                    c.num_episodes for (m, c) in n.children))
 
-#             # (3) Ensure that the total value is the sum of those for all of
-#             #     this node's children.
-#             @test isempty(n.children) ||
-#                 abs(n.total_value - sum(
-#                     c.total_value for (m, c) in n.children)) ≤ 1
+            # (3) Ensure that the total value is the sum of those for all of
+            #     this node's children.
+            @test isempty(n.children) ||
+                abs(n.total_value - sum(
+                    c.total_value for (m, c) in n.children)) ≤ 1
 
-#             # Recursion. Make sure to mark as visited.
-#             for (m, c) in n.children
-# 	              if !(c in visited)
-#                     push!(visited, c)
-#                     dfs(c)
-#                 end
-#             end
-#         end
+            # Recursion. Make sure to mark as visited.
+            for (m, c) in n.children
+	              if !(c in visited)
+                    push!(visited, c)
+                    dfs(c)
+                end
+            end
+        end
 
-#         # Run depth-first-search with checks on the root.
-#         dfs(root)
-#     end
+        # Run depth-first-search with checks on the root.
+        dfs(root)
+    end
 
 #     @testset "CheckFindLeaf" begin
 #         n = find_leaf(root, upper_confidence_strategy)
