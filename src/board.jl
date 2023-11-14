@@ -274,7 +274,7 @@ function Base.show(io::IO, board::GridBoard)
 
     println(top_border)
 
-    for y in 0:board.grid_size-1
+    for y in board.grid_size-1:-1:0
         print("┃")
 
         for x in 0:board.grid_size-1
