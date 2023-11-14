@@ -140,7 +140,7 @@ function check_history(moves, board)
         after_move_idx = before_move_idx+1
 
         before_move = moves[before_move_idx]
-        after_move  = moves[ after_move_idx]
+        after_move  = moves[after_move_idx]
 
         rel_x = after_move.x_position-before_move.x_position
         rel_y = after_move.y_position-before_move.y_position

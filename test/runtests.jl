@@ -172,7 +172,9 @@ end # testset
         # Helper function to return the result of playing MCTS with T = T1 vs.
         # MCTS with T = T2.
         function play_game(; T1, T2)
-            board = GridBoard()
+            p1 = [GridMove(0,0,"left")]
+            p2 = [GridMove(5,5,"down")]
+            board = GridBoard(p1,p2)
 
             result = 0
             while true
@@ -215,3 +217,4 @@ end # testset
         @test total_value2 > 0
     end
 end
+

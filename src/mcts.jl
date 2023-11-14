@@ -146,46 +146,57 @@ export backpropagate!
 
 # # Play a game! Parameterized by time given to the CPU. Assumes CPU plays first.
 # export play_game
-# function play_game(; T = 0.1)
-#     board = TicTacToeBoard()
+function play_game(; T = 0.1)
+    p1 = [GridMove(0,0)]
+    p2 = [GridMove(19,19)]
+    board = GridBoard(p1,p2)
 
-#     result = 0
-#     while true
-#         # CPU's turn.
-#         root = construct_search_tree(board, T = T)
-#         board = upper_confidence_strategy(root).board
+    result = 0
+    while true
+        # CPU's turn.
+        root = construct_search_tree(board, T = T)
+        board = upper_confidence_strategy(root).board
 
-#         # Display board.
-#         println(board)
+        # Display board.
+        println(board)
 
-#         over, result = is_over(board)
-#         if over
-#             break
-#         end
+        over, result = is_over(board)
+        if over
+            break
+        end
 
-#         # Query user for move.
-#         println("Your move! Row = ?")
-#         row = parse(Int, readline())
-#         println("Column = ?")
-#         col = parse(Int, readline())
+        move_prior = board.p2_moves[end]
 
-#         # Construct next board state and repeat.
+        # Query user for move.
+        println("Your move! X = ?")
+        col = move_prior.x_position+parse(Int, readline())
+        println("Y = ?")
+        row = move_prior.y_position+parse(Int, readline())
+        println("Direction?")
+        dir = readline()
+
+
+        # Construct next board state and repeat.
+        m = GridMove(col,row,dir)
+        push!(board.p2_moves,m)
+        @assert is_legal(board)
 #         m = TicTacToeMove(row, col)
 #         push!(board.Os, m)
 #         @assert is_legal(board)
 
-#         over, result = is_over(board)
-#         if over
-#             break
-#         end
-#     end
+        over, result = is_over(board)
+        if over
+            break
+        end
+    end
 
-#     println("Game over!")
-#     if result == -1
-#         println("I won!")
-#     elseif result == 0
-#         println("Tie game.")
-#     else
-#         println("You won.")
-#     end
-# end
+    println("Game over!")
+    if result == -1
+        println("I won!")
+    elseif result == 0
+        println("Tie game.")
+    else
+        println("You won.")
+    end
+end
+export play_game
