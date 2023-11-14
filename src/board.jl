@@ -254,50 +254,6 @@ function is_over(board)
 end
 export is_over
 
-# function is_over(b)
-
-#     # Enumerate and check horizontal wins, then vertical wins.
-#     for i in 1:3
-#         winning_row = Set()
-#         winning_col = Set()
-#         for j in 1:3
-#             push!(winning_row, GridMove(i,j))
-#             push!(winning_col, GridMove(j,i))
-#         end
-
-#         if     winning_row ⊆ Set(b.Xs) || winning_col ⊆ Set(b.Xs)
-#             return true, -1
-#         elseif winning_row ⊆ Set(b.Os) || winning_col ⊆ Set(b.Os)
-#             return true, 1
-#         end
-#     end
-
-#     # Now, diagonals.
-#     winning_diag_L = Set()
-#     winning_diag_R = Set()
-
-#     for i in 1:3
-#         push!(winning_diag_L, GridMove(i,  i))
-#         push!(winning_diag_R, GridMove(i,4-i))
-#     end
-
-#     if     winning_diag_L ⊆ Set(b.Xs) ||  winning_diag_R ⊆ Set(b.Xs)
-#         return true, -1
-#     elseif winning_diag_L ⊆ Set(b.Os) ||  winning_diag_R ⊆ Set(b.Os)
-#         return true, 1
-#     end
-
-#     # Check for ties.
-#     if length(b.Xs) + length(b.Os) ≥ 9
-#         return true, 0
-#     end
-
-#     # If no ending states detected, the game is not over yet.
-#     return false, NaN
-
-# end
-# export is_over
-
 # Utility for printing boards out to the terminal.
 function Base.show(io::IO, b::GridBoard)
     for x in 0:b.grid_size-1
@@ -319,6 +275,7 @@ function Base.show(io::IO, b::GridBoard)
         end
 
         println()
+        
     end
 end
 
