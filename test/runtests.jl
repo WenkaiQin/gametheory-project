@@ -137,8 +137,8 @@ end # testset
 
 
 @testset "MCTSTests" begin
-    # Create a tree to use for these tests.
-    b₀ = TicTacToeBoard()
+#     # Create a tree to use for these tests.
+    b₀ = GridBoard()
     root = construct_search_tree(b₀, T = 0.1)
 
     @testset "CheckValidTree" begin
