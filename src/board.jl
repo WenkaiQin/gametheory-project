@@ -275,10 +275,21 @@ function Base.show(io::IO, board::GridBoard)
             p1_positions = [GridMove(board.p1_moves[end].x_position, board.p1_moves[end].y_position)]
             p2_positions = [GridMove(board.p2_moves[end].x_position, board.p2_moves[end].y_position)]
 
+            p1_strike = strike_zone(board.p1_moves[end].x_position,
+                                    board.p1_moves[end].y_position,
+                                    board.p1_moves[end].direction)
+            p2_strike = strike_zone(board.p2_moves[end].x_position,
+                                    board.p2_moves[end].y_position,
+                                    board.p2_moves[end].direction)
+
             if m ∈ p1_positions
                 print(" 1 ")
             elseif m ∈ p2_positions
                 print(" 2 ")
+            elseif m ∈ p1_strike
+                print("₁")
+            elseif m ∈ p1_strike
+                print("₂")
             else
                 print(" . ")
             end
