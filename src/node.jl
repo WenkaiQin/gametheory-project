@@ -4,7 +4,7 @@
 # NOTE: this struct is mutable since we will be changing some fields throughout
 #       tree search.
 mutable struct Node
-    b
+    board
     parent::Union{Nothing, Node}
     children::Dict
     total_value::Float64
@@ -12,5 +12,5 @@ mutable struct Node
 end # struct
 
 # Custom constructor from the given board.
-Node(b; parent = nothing) = Node(b, parent, Dict(), 0.0, 0)
+Node(board; parent = nothing) = Node(board, parent, Dict(), 0.0, 0)
 export Node
