@@ -29,6 +29,7 @@ struct GridMove <: Position
 end # struct
 export GridMove
 
+# TODO: Check documentation for mutable struct - could invoke a malloc(). Stack vs. heap.
 mutable struct GridBoard <: Board
 
     p1_moves::AbstractArray{GridMove}
@@ -46,11 +47,13 @@ mutable struct GridBoard <: Board
             DEFAULT_BOARD_SIZE, DEFAULT_RANGE)
     end
 
-    function GridBoard(g_size, ran)
-        new([GridMove(0,0,"right")],
-            [GridMove(DEFAULT_BOARD_SIZE-1,DEFAULT_BOARD_SIZE-1,"left")],
-            g_size, ran)
-    end
+    # TODO: Make type specifications here.
+
+    # function GridBoard(g_size, ran)
+    #     new([GridMove(0,0,"right")],
+    #         [GridMove(DEFAULT_BOARD_SIZE-1,DEFAULT_BOARD_SIZE-1,"left")],
+    #         g_size, ran)
+    # end
 
     function GridBoard(p1_ms, p2_ms)
         new(p1_ms, p2_ms, DEFAULT_BOARD_SIZE, DEFAULT_RANGE)
