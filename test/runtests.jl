@@ -27,20 +27,6 @@ seed!(0)
             @test !is_legal(b)
         end # testset
 
-        @testset "DirectionCompatibilityTrue" begin
-            p1_moves = [GridMove(2,3,"right"), GridMove(4,3,"right")]
-            p2_moves = [GridMove(2,3,"left" ), GridMove(2,2,"down" )]
-            b = GridBoard(p1_moves, p2_moves)
-            @test is_legal(b)
-        end # testset
-
-        @testset "DirectionCompatibilityFalse" begin
-            p1_moves = [GridMove(2,3,"right"), GridMove(4,5,"down" )]
-            p2_moves = [GridMove(2,3,"left" ), GridMove(1,1,"right")]
-            b = GridBoard(p1_moves, p2_moves)
-            @test !is_legal(b)
-        end # testset
-
         @testset "UnbalancedMoves" begin
             p1_moves = [GridMove(1,3), GridMove(1,3)]
             p2_moves = [GridMove(2,2), GridMove(2,2), GridMove(2,2)]
@@ -57,8 +43,8 @@ seed!(0)
 
         @testset "LegalNonTerminal" begin
             p1_moves = [GridMove(1,3,"right"), GridMove(2,3,"right")]
-            p2_moves = [GridMove(6,6,"left"), GridMove(5,6,"left")]
-            b = GridBoard(p1_moves,p2_moves)
+            p2_moves = [GridMove(6,6,"left" ), GridMove(5,6,"left")]
+            b = GridBoard(p1_moves, p2_moves)
             @test is_legal(b)
             @test up_next(b) == 1
             over,result = is_over(b)
@@ -67,8 +53,8 @@ seed!(0)
 
         @testset "LegalTerminal" begin
             p1_moves = [GridMove(1,3,"right"), GridMove(2,3,"right")]
-            p2_moves = [GridMove(5,3,"up"), GridMove(5,4,"up")]
-            b = GridBoard(p1_moves,p2_moves)
+            p2_moves = [GridMove(5,3,"up"   ), GridMove(5,4,"up"   )]
+            b = GridBoard(p1_moves, p2_moves)
             @test is_legal(b)
             over,result = is_over(b)
             @test over
@@ -77,32 +63,15 @@ seed!(0)
 
     # Check next moves from a given board.
     @testset "CheckNextMoves" begin
-        p1_moves = [GridMove(1,3), GridMove(1,4,"up")]
-        p2_moves = [GridMove(2,2)]
+        p1_moves = [GridMove(1,3,"right"), GridMove(1,4,"up")]
+        p2_moves = [GridMove(2,2,"right")]
         b = GridBoard(p1_moves, p2_moves, 5, 4)
 
-        moves = next_moves(b)
-        correct_moves = [
-            GridMove(0, 0, "left" ), GridMove(0, 0, "down" ), GridMove(1, 0, "left" ),
-            GridMove(1, 0, "down" ), GridMove(2, 0, "down" ), GridMove(3, 0, "right"),
-            GridMove(3, 0, "down" ), GridMove(4, 0, "right"), GridMove(4, 0, "down" ),
-            GridMove(0, 1, "left" ), GridMove(0, 1, "down" ), GridMove(1, 1, "left" ),
-            GridMove(1, 1, "down" ), GridMove(2, 1, "down" ), GridMove(3, 1, "right"),
-            GridMove(3, 1, "down" ), GridMove(4, 1, "right"), GridMove(4, 1, "down" ),
-            GridMove(5, 1, "right"), GridMove(5, 1, "down" ), GridMove(0, 2, "left" ),
-            GridMove(1, 2, "left" ), GridMove(2, 2, "left" ), GridMove(2, 2, "right"),
-            GridMove(2, 2, "up"   ), GridMove(2, 2, "down" ), GridMove(3, 2, "right"),
-            GridMove(4, 2, "right"), GridMove(5, 2, "right"), GridMove(6, 2, "right"),
-            GridMove(0, 3, "left" ), GridMove(0, 3, "up"   ), GridMove(1, 3, "left" ),
-            GridMove(1, 3, "up"   ), GridMove(2, 3, "up"   ), GridMove(3, 3, "right"),
-            GridMove(3, 3, "up"   ), GridMove(4, 3, "right"), GridMove(4, 3, "up"   ),
-            GridMove(5, 3, "right"), GridMove(5, 3, "up"   ), GridMove(0, 4, "left" ),
-            GridMove(0, 4, "up"   ), GridMove(1, 4, "left" ), GridMove(1, 4, "up"   ),
-            GridMove(2, 4, "up"   ), GridMove(3, 4, "right"), GridMove(3, 4, "up"   ),
-            GridMove(4, 4, "right"), GridMove(4, 4, "up"   ), GridMove(1, 5, "left" ),
-            GridMove(1, 5, "up"   ), GridMove(2, 5, "up"   ), GridMove(3, 5, "right"),
-            GridMove(3, 5, "up"   ), GridMove(2, 6, "up"   )
-        ]
+        time = @time moves = next_moves(b)
+        println(time)
+        println(moves)
+        # correct_moves = [
+        # ]
 
         for m ∈ moves
             @test m ∈ correct_moves
@@ -118,7 +87,7 @@ end # testset
 
 
 @testset "MCTSTests" begin
-#     # Create a tree to use for these tests.
+    # Create a tree to use for these tests.
     board₀ = GridBoard()
     root = construct_search_tree(board₀, T = 0.1)
 
@@ -171,9 +140,9 @@ end # testset
         # Helper function to return the result of playing MCTS with T = T1 vs.
         # MCTS with T = T2.
         function play_game(; T1, T2)
-            p1 = [GridMove(0,0,"left")]
-            p2 = [GridMove(5,5,"down")]
-            board = GridBoard(p1,p2)
+
+            board = board₀
+            println(board)
 
             result = 0
             while true

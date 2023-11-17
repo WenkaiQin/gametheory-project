@@ -37,25 +37,23 @@ mutable struct GridBoard <: Board
     grid_size::Int
     range::Int
 
-    function GridBoard(p1_ms, p2_ms, g_size, ran)
+    function GridBoard(p1_ms::Vector{GridMove}, p2_ms::Vector{GridMove}, g_size::Int, ran::Int)
         new(p1_ms, p2_ms, g_size, ran)
     end
 
     function GridBoard()
-        new([GridMove(0,0,"right")],
-            [GridMove(DEFAULT_BOARD_SIZE-1,DEFAULT_BOARD_SIZE-1,"left")],
+        new([GridMove(0                   , 0                   , "right")],
+            [GridMove(DEFAULT_BOARD_SIZE-1, DEFAULT_BOARD_SIZE-1, "left" )],
             DEFAULT_BOARD_SIZE, DEFAULT_RANGE)
     end
 
-    # TODO: Make type specifications here.
+    function GridBoard(g_size::Int, ran::Int)
+        new([GridMove(0                   , 0                   , "right")],
+            [GridMove(DEFAULT_BOARD_SIZE-1, DEFAULT_BOARD_SIZE-1, "left" )],
+            g_size, ran)
+    end
 
-    # function GridBoard(g_size, ran)
-    #     new([GridMove(0,0,"right")],
-    #         [GridMove(DEFAULT_BOARD_SIZE-1,DEFAULT_BOARD_SIZE-1,"left")],
-    #         g_size, ran)
-    # end
-
-    function GridBoard(p1_ms, p2_ms)
+    function GridBoard(p1_ms::Vector{GridMove}, p2_ms::Vector{GridMove})
         new(p1_ms, p2_ms, DEFAULT_BOARD_SIZE, DEFAULT_RANGE)
     end
 
@@ -75,31 +73,77 @@ function next_moves(board)
     end
 
     # Go through all possible next moves. Check at each one if the move creates a legal board.
-    all_next_m = []
+    # all_next_m = []
 
     # TODO: You could construct this more intelligently per-quadrant.
-    for rel_move_x in -board.range:board.range
-        for rel_move_y in -board.range:board.range
-            for direction in VALID_DIRECTIONS
+    # for rel_move_x in -board.range:board.range
+    #     for rel_move_y in -board.range:board.range
+    #         for direction in VALID_DIRECTIONS
 
-                move_candidate = GridMove(current_pos.x_position+rel_move_x,
-                                          current_pos.y_position+rel_move_y, direction)
+    #             move_candidate = GridMove(current_pos.x_position+rel_move_x,
+    #                                       current_pos.y_position+rel_move_y, direction)
 
-                b_candidate = nothing
+    #             b_candidate = nothing
 
+    #             if player == 1
+    #                 b_candidate = GridBoard(vcat(board.p1_moves, [move_candidate]), board.p2_moves)
+    #             elseif player == 2
+    #                 b_candidate = GridBoard(board.p1_moves, vcat(board.p2_moves, [move_candidate]))
+    #             end
+
+    #             if is_legal(b_candidate)
+    #                 push!(all_next_m, move_candidate)
+    #             end
+
+    #         end
+    #     end
+    # end
+
+    # Use a depth-first search to find the set of next possible moves.
+    # Start with null move.
+    all_next_m = [current_pos]
+
+    for i_range = 1:board.range
+
+        for move_base ∈ all_next_m
+
+            for direction ∈ VALID_DIRECTIONS
+
+                if direction == "up"
+                    inc_x =  0
+                    inc_y = +1
+                elseif direction == "down"
+                    inc_x =  0
+                    inc_y = -1
+                elseif direction == "left"
+                    inc_x = -1
+                    inc_y =  0
+                elseif direction == "right"
+                    inc_x = +1
+                    inc_y =  0
+                end # if direction ==
+
+                move_candidate = GridMove(move_base.x_position+inc_x,
+                                          move_base.y_position+inc_y, direction)
+
+                # No need to check the entire history - the range check is
+                # already checked via the for loops. We save some performance
+                # here.
                 if player == 1
-                    b_candidate = GridBoard(vcat(board.p1_moves, [move_candidate]), board.p2_moves)
+                    board_candidate = GridBoard([move_candidate], [board.p2_moves[end]])
                 elseif player == 2
-                    b_candidate = GridBoard(board.p1_moves, vcat(board.p2_moves, [move_candidate]))
-                end
+                    board_candidate = GridBoard([board.p1_moves[end]], [move_candidate])
+                end # if player ==
 
-                if is_legal(b_candidate)
+                if is_legal(board_candidate)
                     push!(all_next_m, move_candidate)
-                end
+                end # if is_legal
 
-            end
-        end
-    end
+            end # for direction
+
+        end # for move_base
+
+    end # for i_range
 
     return all_next_m
 
@@ -159,29 +203,32 @@ function check_history(moves, board)
             return false
         end
 
-        # Check that the directions match the moves made. But don't bother
-        # checking if the player stood still.
-        if !(rel_x==0 && rel_y==0)
+        # WQ: Removed temporarily given that depth-first-search gives the
+        # legal directions already. Remove permamently on confirmation of
+        # method.
+        # # Check that the directions match the moves made. But don't bother
+        # # checking if the player stood still.
+        # if !(rel_x==0 && rel_y==0)
 
-            compatible_directions = []
-            if rel_x>0
-                push!(compatible_directions, "right")
-            end
-            if rel_y>0
-                push!(compatible_directions, "up")
-            end
-            if rel_x<0
-                push!(compatible_directions, "left")
-            end
-            if rel_y<0
-                push!(compatible_directions, "down")
-            end
+        #     compatible_directions = []
+        #     if rel_x>0
+        #         push!(compatible_directions, "right")
+        #     end
+        #     if rel_y>0
+        #         push!(compatible_directions, "up")
+        #     end
+        #     if rel_x<0
+        #         push!(compatible_directions, "left")
+        #     end
+        #     if rel_y<0
+        #         push!(compatible_directions, "down")
+        #     end
 
-            if after_move.direction ∉ compatible_directions
-                return false
-            end
+        #     if after_move.direction ∉ compatible_directions
+        #         return false
+        #     end
 
-        end
+        # end
     end
 
     # If all tests pass, return true.
@@ -218,6 +265,7 @@ function strike_zone(x,y,dir)
             end
         end
     end
+
     # Rotate grid according to strike direction
     if dir == "right"
         reshape_grid = reshape_grid

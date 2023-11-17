@@ -175,14 +175,10 @@ function play_game(; T = 0.1)
         println("Direction?")
         dir = readline()
 
-
         # Construct next board state and repeat.
         m = GridMove(col,row,dir)
         push!(board.p2_moves,m)
         @assert is_legal(board)
-#         m = TicTacToeMove(row, col)
-#         push!(board.Os, m)
-#         @assert is_legal(board)
 
         over, result = is_over(board)
         if over
@@ -198,5 +194,6 @@ function play_game(; T = 0.1)
     else
         println("You won.")
     end
+
 end
 export play_game
