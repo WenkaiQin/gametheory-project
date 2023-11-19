@@ -172,7 +172,7 @@ end # testset
         # MCTS with T = T2.
         function play_game(; T1, T2)
             p1 = [GridMove(0,0,"left")]
-            p2 = [GridMove(19,19,"down")]
+            p2 = [GridMove(5,5,"down")]
             board = GridBoard(p1,p2)
 
             result = 0
