@@ -63,7 +63,7 @@ function upper_confidence_strategy(node)
 
         # Find UCT value.
         player = up_next(node.board)
-        uct_val = (-1)^player*child.total_value/child.num_episodes
+        uct_val = (-1)^(player+1)*child.total_value/child.num_episodes
                    + c*√(log(node.num_episodes)/child.num_episodes)
 
         # Check for new maximum.
