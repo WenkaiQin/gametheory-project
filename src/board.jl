@@ -6,7 +6,8 @@ abstract type Position end
 export Position
 
 DEFAULT_BOARD_SIZE = 20
-DEFAULT_RANGE = 4
+#DEFAULT_RANGE = 4
+DEFAULT_RANGE = [3 4]
 VALID_DIRECTIONS = ["left","right","up","down"]
 
 struct GridMove <: Position
@@ -35,7 +36,9 @@ mutable struct GridBoard <: Board
     p1_moves::AbstractArray{GridMove}
     p2_moves::AbstractArray{GridMove}
     grid_size::Int
-    range::Int
+    #range::Int
+    range::Array
+
 
     function GridBoard(p1_ms, p2_ms, g_size, ran)
         new(p1_ms, p2_ms, g_size, ran)
@@ -78,8 +81,10 @@ function next_moves(board)
     all_next_m = []
 
     # TODO: You could construct this more intelligently per-quadrant.
-    for rel_move_x in -board.range:board.range
-        for rel_move_y in -board.range:board.range
+    #for rel_move_x in -board.range:board.range
+     #   for rel_move_y in -board.range:board.range
+     for rel_move_x in -board.range[player]:board.range[player]
+        for rel_move_y in -board.range[player]:board.range[player]
             for direction in VALID_DIRECTIONS
 
                 move_candidate = GridMove(current_pos.x_position+rel_move_x,
@@ -155,7 +160,9 @@ function check_history(moves, board)
         rel_y = after_move.y_position-before_move.y_position
 
         # Check distance between moves by 1-norm.
-        if (abs(rel_x)+abs(rel_y)) > board.range
+        player = up_next(board) # Comment out if symmetric ranges
+        # if (abs(rel_x))+abs(rel_y)) > board.range
+        if (abs(rel_x)+abs(rel_y)) > board.range[player]
             return false
         end
 

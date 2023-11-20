@@ -79,7 +79,8 @@ seed!(0)
     @testset "CheckNextMoves" begin
         p1_moves = [GridMove(1,3), GridMove(1,4,"up")]
         p2_moves = [GridMove(2,2)]
-        b = GridBoard(p1_moves, p2_moves, 5, 4)
+        #b = GridBoard(p1_moves, p2_moves, 5, 4)
+        b = GridBoard(p1_moves,p2_moves,5,[3 4])
 
         moves = next_moves(b)
         correct_moves = [
