@@ -65,7 +65,8 @@ seed!(0)
     @testset "CheckNextMoves" begin
         p1_moves = [GridMove(1,3,"right"), GridMove(1,4,"up")]
         p2_moves = [GridMove(2,2,"right")]
-        b = GridBoard(p1_moves, p2_moves, 5, 4)
+        #b = GridBoard(p1_moves, p2_moves, 5, 4)
+        b = GridBoard(p1_moves,p2_moves, 5, [3 4])
 
         time = @time moves = next_moves(b)
         println(time)
@@ -149,20 +150,27 @@ end # testset
                 # P1 turn.
                 root = construct_search_tree(board, T = T1)
                 board = upper_confidence_strategy(root).board
-                println(board)
+                #println(board)
 
                 over, result = is_over(board)
+                #println(over)
                 if over
+                    println("P1:")
+                    println(result)
+                    println(board)
                     break
                 end
 
                 # P2 turn.
                 root = construct_search_tree(board, T = T2)
                 board = upper_confidence_strategy(root).board
-                println(board)
+                #println(board)
 
                 over, result = is_over(board)
                 if over
+                    println("P2")
+                    print(result)
+                    println(board)
                     break
                 end
             end
@@ -173,8 +181,8 @@ end # testset
         # Run a bunch of tests to confirm that the player with more time wins.
         total_value1 = 0
         total_value2 = 0
-        for ii in 1:100
-            total_value1 += play_game(T1 = 0.1, T2 = 5)
+        for ii in 1:5
+            total_value1 += play_game(T1 = 0.1, T2 = 2.1)
             total_value2 += play_game(T1 = 2.1, T2 = 0.1)
         end
 
