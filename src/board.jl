@@ -6,7 +6,6 @@ abstract type Position end
 export Position
 
 DEFAULT_BOARD_SIZE = 20
-#DEFAULT_RANGE = 4
 DEFAULT_RANGE = [3 4]
 VALID_DIRECTIONS = ["left","right","up","down"]
 
@@ -15,7 +14,6 @@ struct GridMove <: Position
     x_position::Int
     y_position::Int
     direction::String
-
 
     function GridMove(x_pos, y_pos, dir)
         new(x_pos, y_pos, dir)
@@ -36,11 +34,11 @@ mutable struct GridBoard <: Board
     p1_moves::AbstractArray{GridMove}
     p2_moves::AbstractArray{GridMove}
     grid_size::Int
-    #range::Int
     range::Array
 
 
-    function GridBoard(p1_ms::Vector{GridMove}, p2_ms::Vector{GridMove}, g_size::Int, ran::Int)
+    function GridBoard(p1_ms::Vector{GridMove}, p2_ms::Vector{GridMove}, g_size::Int, ran::Array)
+        println("Default constructor used.")
         new(p1_ms, p2_ms, g_size, ran)
     end
 
@@ -50,7 +48,7 @@ mutable struct GridBoard <: Board
             DEFAULT_BOARD_SIZE, DEFAULT_RANGE)
     end
 
-    function GridBoard(g_size::Int, ran::Int)
+    function GridBoard(g_size::Int, ran::Array)
         new([GridMove(0                   , 0                   , "right")],
             [GridMove(DEFAULT_BOARD_SIZE-1, DEFAULT_BOARD_SIZE-1, "left" )],
             g_size, ran)
@@ -75,42 +73,16 @@ function next_moves(board)
         current_pos = board.p2_moves[end]
     end
 
-    # Go through all possible next moves. Check at each one if the move creates a legal board.
-    # all_next_m = []
-
-    # TODO: You could construct this more intelligently per-quadrant.
-    # for rel_move_x in -board.range:board.range
-    #     for rel_move_y in -board.range:board.range
-     for rel_move_x in -board.range[player]:board.range[player]
-        for rel_move_y in -board.range[player]:board.range[player]
-    #         for direction in VALID_DIRECTIONS
-
-    #             move_candidate = GridMove(current_pos.x_position+rel_move_x,
-    #                                       current_pos.y_position+rel_move_y, direction)
-
-    #             b_candidate = nothing
-
-    #             if player == 1
-    #                 b_candidate = GridBoard(vcat(board.p1_moves, [move_candidate]), board.p2_moves)
-    #             elseif player == 2
-    #                 b_candidate = GridBoard(board.p1_moves, vcat(board.p2_moves, [move_candidate]))
-    #             end
-
-    #             if is_legal(b_candidate)
-    #                 push!(all_next_m, move_candidate)
-    #             end
-
-    #         end
-    #     end
-    # end
-
     # Use a depth-first search to find the set of next possible moves.
     # Start with null move.
     all_next_m = [current_pos]
+    for i_range = 1:board.range[player]
 
-    for i_range = 1:board.range
+        # Save off the next moves at this moment to iterate, otherwise we end
+        # up self iterating.
+        all_next_m_cache = copy(all_next_m)
 
-        for move_base ∈ all_next_m
+        for move_base ∈ all_next_m_cache
 
             for direction ∈ VALID_DIRECTIONS
 
@@ -126,10 +98,15 @@ function next_moves(board)
                 elseif direction == "right"
                     inc_x = +1
                     inc_y =  0
-                end # if direction ==
+                end # if direction
 
                 move_candidate = GridMove(move_base.x_position+inc_x,
                                           move_base.y_position+inc_y, direction)
+
+                # If this move already exists in the list of possible next moves, don't consider it.
+                if move_candidate ∈ all_next_m
+                    continue
+                end
 
                 # No need to check the entire history - the range check is
                 # already checked via the for loops. We save some performance
@@ -138,16 +115,14 @@ function next_moves(board)
                     board_candidate = GridBoard([move_candidate], [board.p2_moves[end]])
                 elseif player == 2
                     board_candidate = GridBoard([board.p1_moves[end]], [move_candidate])
-                end # if player ==
+                end # if player
 
                 if is_legal(board_candidate)
                     push!(all_next_m, move_candidate)
                 end # if is_legal
 
             end # for direction
-
         end # for move_base
-
     end # for i_range
 
     return all_next_m

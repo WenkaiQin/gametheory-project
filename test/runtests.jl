@@ -66,14 +66,21 @@ seed!(0)
         p1_moves = [GridMove(1,3,"right"), GridMove(1,4,"up")]
         p2_moves = [GridMove(2,2,"right")]
         #b = GridBoard(p1_moves, p2_moves, 5, 4)
-        b = GridBoard(p1_moves,p2_moves, 5, [3 4])
+        b = GridBoard(p1_moves, p2_moves, 5, [1 2])
 
-        time = @time moves = next_moves(b)
-        println(time)
+        moves = next_moves(b)
+
         println(moves)
-        # correct_moves = [
-        # ]
 
+        correct_moves = GridMove[
+            GridMove(2, 2, "right"), GridMove(1, 2, "left" ), GridMove(3, 2, "right"),
+            GridMove(2, 3, "up"   ), GridMove(2, 1, "down" ), GridMove(0, 2, "left" ),
+            GridMove(1, 3, "up"   ), GridMove(1, 1, "down" ), GridMove(2, 2, "left" ),
+            GridMove(4, 2, "right"), GridMove(3, 3, "up"   ), GridMove(3, 1, "down" ),
+            GridMove(1, 3, "left" ), GridMove(3, 3, "right"), GridMove(2, 4, "up"   ),
+            GridMove(2, 2, "down" ), GridMove(1, 1, "left" ), GridMove(3, 1, "right"),
+            GridMove(2, 2, "up"   ), GridMove(2, 0, "down" )]
+    
         for m ∈ moves
             @test m ∈ correct_moves
         end
@@ -81,6 +88,7 @@ seed!(0)
         for m̂ ∈ correct_moves
             @test m̂ ∈ moves
         end
+        @test true
 
     end # testset
 
@@ -164,7 +172,7 @@ end # testset
                 # P2 turn.
                 root = construct_search_tree(board, T = T2)
                 board = upper_confidence_strategy(root).board
-                #println(board)
+                # println(board)
 
                 over, result = is_over(board)
                 if over
