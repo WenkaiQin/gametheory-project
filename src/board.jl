@@ -5,6 +5,9 @@ export Board
 abstract type Position end
 export Position
 
+abstract type Obstacle end
+export Obstacle
+
 DEFAULT_BOARD_SIZE = 20
 DEFAULT_RANGE = [3 4]
 VALID_DIRECTIONS = ["left","right","up","down"]
@@ -24,9 +27,16 @@ struct GridMove <: Position
         new(x_pos, y_pos, "right")
     end
 
-
 end # struct
 export GridMove
+
+struct GridObstacle<:Obstacle
+
+    x_bounds::Array
+    y_bounds::Array
+
+end # struct
+export GridObstacle
 
 # TODO: Check documentation for mutable struct - could invoke a malloc(). Stack vs. heap.
 mutable struct GridBoard <: Board
@@ -35,26 +45,36 @@ mutable struct GridBoard <: Board
     p2_moves::AbstractArray{GridMove}
     grid_size::Int
     range::Array
+    obstacles::AbstractArray{GridObstacle}
 
+    function GridBoard(p1_ms::Vector{GridMove}, p2_ms::Vector{GridMove}, g_size::Int, ran::Array, obs::Vector{GridObstacle})
+        new(p1_ms, p2_ms, g_size, ran, obs)
+    end
+
+    function GridBoard(p1_ms::Vector{GridMove}, p2_ms::Vector{GridMove}, g_size::Int, ran::Int, obs::Vector{GridObstacle})
+        new(p1_ms, p2_ms, g_size, [ran ran], obs)
+    end
 
     function GridBoard(p1_ms::Vector{GridMove}, p2_ms::Vector{GridMove}, g_size::Int, ran::Array)
-        new(p1_ms, p2_ms, g_size, ran)
+        new(p1_ms, p2_ms, g_size, ran, Vector{GridObstacle}())
     end
 
     function GridBoard()
         new([GridMove(0                   , 0                   , "right")],
             [GridMove(DEFAULT_BOARD_SIZE-1, DEFAULT_BOARD_SIZE-1, "left" )],
-            DEFAULT_BOARD_SIZE, DEFAULT_RANGE)
+            DEFAULT_BOARD_SIZE, DEFAULT_RANGE,
+            Vector{GridObstacle}())
     end
 
     function GridBoard(g_size::Int, ran::Array)
         new([GridMove(0                   , 0                   , "right")],
             [GridMove(DEFAULT_BOARD_SIZE-1, DEFAULT_BOARD_SIZE-1, "left" )],
-            g_size, ran)
+            g_size, ran,
+            Vector{GridObstacle}())
     end
 
     function GridBoard(p1_ms::Vector{GridMove}, p2_ms::Vector{GridMove})
-        new(p1_ms, p2_ms, DEFAULT_BOARD_SIZE, DEFAULT_RANGE)
+        new(p1_ms, p2_ms, DEFAULT_BOARD_SIZE, DEFAULT_RANGE, Vector{GridObstacle}())
     end
 
 end # struct
@@ -116,16 +136,18 @@ function next_moves(board)
                     board_candidate = GridBoard([board.p1_moves[end]; move_candidate],
                                                 [board.p2_moves[end]],
                                                  board.grid_size,
-                                                 board.range)
+                                                 board.range,
+                                                 board.obstacles)
                 elseif player == 2
                     # board_candidate = GridBoard( board.p1_moves,
                                                 # [board.p2_moves; move_candidate],
-                                                 # board.grid_size,
-                                                 # board.range)
+                                                #  board.grid_size,
+                                                #  board.range)
                     board_candidate = GridBoard( board.p1_moves[end-1:end],
                                                 [board.p2_moves[end]; move_candidate],
                                                  board.grid_size,
-                                                 board.range)
+                                                 board.range,
+                                                 board.obstacles)
                 end # if player
 
                 if is_legal(board_candidate)
@@ -138,10 +160,10 @@ function next_moves(board)
 
     return all_next_m
 
-end
+end # function
 export next_moves
 
-# Check if the given board is legal. For now, this only checks if anyone is out of bounds.
+# Check if the given board is legal.
 function is_legal(board)
 
     # Check number of moves per player. Assume p1 goes first.
@@ -157,7 +179,7 @@ function is_legal(board)
     # If all tests succeed, return True.
     return true
 
-end
+end # function
 export is_legal
 
 function check_history(moves, board, player)
@@ -178,6 +200,12 @@ function check_history(moves, board, player)
         if position.direction ∉ VALID_DIRECTIONS
             return false
         end
+
+        # Check obstacle collision.
+        if is_obstructed(position, board)
+            return false
+        end
+
     end
 
     # Move-relative checks.
@@ -207,16 +235,16 @@ function check_history(moves, board, player)
         # not move, no direction change is permitted.
         if !(rel_x==0 && rel_y==0)
             compatible_directions = []
+
             if rel_x>0
                 push!(compatible_directions, "right")
-            end
-            if rel_y>0
-                push!(compatible_directions, "up")
-            end
-            if rel_x<0
+            elseif rel_x<0
                 push!(compatible_directions, "left")
             end
-            if rel_y<0
+
+            if rel_y>0
+                push!(compatible_directions, "up")
+            elseif rel_y<0
                 push!(compatible_directions, "down")
             end
 
@@ -238,7 +266,7 @@ function check_history(moves, board, player)
     # If all tests pass, return true.
     return true
 
-end
+end # function
 export check_history
 
 # Which player is up?
@@ -250,7 +278,7 @@ function up_next(board)
         return 2
     end
 
-end
+end # function
 export up_next
 
 function strike_zone(x,y,dir)
@@ -285,11 +313,34 @@ function strike_zone(x,y,dir)
     reshape_grid .+= [[x y]]
 
     return reshape_grid
-end
+end # function
 export strike_zone
 
+function is_obstructed(position::GridMove, board::GridBoard)
+
+    for obstacle in board.obstacles
+        # println(position)
+        # println(obstacle)
+        # println(obstacle.x_bounds)
+        # println(obstacle.y_bounds)
+        # print("X check: ")
+        # println(obstacle.x_bounds[1] ≤ position.x_position ≤ obstacle.x_bounds[2])
+        # print("Y check: ")
+        # println(obstacle.y_bounds[1] ≤ position.y_position ≤ obstacle.y_bounds[2])
+        if ((obstacle.x_bounds[1] ≤ position.x_position ≤ obstacle.x_bounds[2])
+            && (obstacle.y_bounds[1] ≤ position.y_position ≤ obstacle.y_bounds[2]))
+            # println('a')
+            return true
+        end
+    end
+
+    return false
+
+end # function
+export is_obstructed
+
 # Check if the game is over. If it is over, returns the outcome.
-function is_over(board)
+function is_over(board::GridBoard)
 
     # If player i is in player j's strike zone and player j is not in player
     # i's strike zone, then player i loses.
@@ -317,7 +368,7 @@ function is_over(board)
     else
         return false,NaN
     end
-end
+end # function
 export is_over
 
 # Utility for printing boards out to the terminal.
@@ -336,43 +387,46 @@ function Base.show(io::IO, board::GridBoard)
 
             m = GridMove(x, y)
 
-            # p1_positions = [GridMove(p1_move.x_position, p1_move.y_position)
-            #                     for p1_move in board.p1_moves]
-            # p2_positions = [GridMove(p2_move.x_position, p2_move.y_position)
-            #                     for p2_move in board.p2_moves]
-
             p1_positions = [GridMove(board.p1_moves[end].x_position, board.p1_moves[end].y_position)]
             p2_positions = [GridMove(board.p2_moves[end].x_position, board.p2_moves[end].y_position)]
 
-            p1_strike = strike_zone(board.p1_moves[end].x_position,
-                                    board.p1_moves[end].y_position,
+            # Draw strike zone.
+            p1_strike = strike_zone(board.p1_moves[end].x_position, board.p1_moves[end].y_position,
                                     board.p1_moves[end].direction)
-            p2_strike = strike_zone(board.p2_moves[end].x_position,
-                                    board.p2_moves[end].y_position,
+            p2_strike = strike_zone(board.p2_moves[end].x_position, board.p2_moves[end].y_position,
                                     board.p2_moves[end].direction)
 
+            # Draw players.
             # TODO: Make a conversion from [x,y] to GridMove.
             if m ∈ p1_positions
                 printstyled(" 1 "; color = :red)
             elseif m ∈ p2_positions
                 printstyled(" 2 "; color = :blue)
+
+            # Draw obstacles.
+            elseif is_obstructed(m, board)
+                print(" ▧ ")
+
+            # Draw strike zones.
             elseif [x y] ∈ p1_strike && [x y] ∈ p2_strike
                 printstyled(" ½ "; color = :magenta)
             elseif [x y] ∈ p1_strike
                 printstyled(" ₁ "; color = :red)
             elseif [x y] ∈ p2_strike
                 printstyled(" ₂ "; color = :blue)
+
+            # Draw empty space.
             else
                 print("   ")
             end
-        end # end for x
+
+        end # for x
         print("┃")
         println()
 
-    end # end for y
+    end # for y
 
     println(bot_border)
 
-
-end
+end # function
 

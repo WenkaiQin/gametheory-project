@@ -59,6 +59,15 @@ seed!(0)
             over,result = is_over(b)
             @test over
         end # testset
+
+        @testset "ObstacleCollision" begin
+            b = GridBoard([GridMove(2, 4, "right")],
+                          [GridMove(3, 4, "left" )],
+                          10, 3,
+                          [GridObstacle([2,3], [4,5])] )
+
+            @test !is_legal(b)
+        end
     end # testset
 
     # Check next moves from a given board.
@@ -97,7 +106,10 @@ end # testset
 
 @testset "MCTSTests" begin
     # Create a tree to use for these tests.
-    board₀ = GridBoard()
+    board₀ = GridBoard([GridMove(0, 0, "right")],
+                       [GridMove(9, 9, "left" )],
+                       10, 3,
+                       [GridObstacle([1,8], [1,8])] )
     root = construct_search_tree(board₀, T = 0.1)
 
     @testset "CheckValidTree" begin
@@ -158,13 +170,14 @@ end # testset
                 # P1 turn.
                 root = construct_search_tree(board, T = T1)
                 board = upper_confidence_strategy(root).board
-                #println(board)
+                println(board)
 
                 over, result = is_over(board)
                 #println(over)
                 if over
-                    println("P1:")
+                    print("P1: ")
                     println(result)
+                    println()
                     println(board)
                     break
                 end
@@ -172,12 +185,13 @@ end # testset
                 # P2 turn.
                 root = construct_search_tree(board, T = T2)
                 board = upper_confidence_strategy(root).board
-                # println(board)
+                println(board)
 
                 over, result = is_over(board)
                 if over
-                    println("P2")
-                    print(result)
+                    print("P2: ")
+                    println(result)
+                    println()
                     println(board)
                     break
                 end
