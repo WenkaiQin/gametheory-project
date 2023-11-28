@@ -204,7 +204,7 @@ end # testset
         total_value1 = 0
         total_value2 = 0
         for ii in 1:5
-            total_value1 += play_game(T1 = 0.1, T2 = 2.1)
+            total_value1 += play_game(T1 = 0.1, T2 = 20.1)
             total_value2 += play_game(T1 = 2.1, T2 = 0.1)
         end
 

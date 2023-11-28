@@ -3,6 +3,9 @@
 # # spent in tree construction.
 # # For reference: https://en.wikipedia.org/wiki/Monte_Carlo_tree_search
 function construct_search_tree(board::GridBoard; T = 1)
+
+    flag_print_vals = false
+
     start_time = time()
 
     # Create a root node for the tree from this board state.
@@ -15,9 +18,6 @@ function construct_search_tree(board::GridBoard; T = 1)
     while time() - start_time < T
         # Find a leaf of the tree using UCT.
         leaf = find_leaf(root, upper_confidence_strategy)
-        if num_runs==0
-            my_fav_child = leaf
-        end
 
         over, result = is_over(leaf.board)
         if over
@@ -48,9 +48,20 @@ function construct_search_tree(board::GridBoard; T = 1)
         end
 
         num_runs = num_runs+1
-        println(my_fav_child.num_episodes)
-        println(my_fav_child.total_value)
-    end
+
+        if flag_print_vals
+            println("==========")
+            println(root.num_episodes)
+            for (key, val) in root.children
+                print(key)
+                print("\t val.num_episodes: ")
+                print(val.num_episodes)
+                print("\t val.total_value: ")
+                println(val.total_value)
+            end
+        end
+
+    end # while
 
     return root
 end
