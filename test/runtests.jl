@@ -65,21 +65,22 @@ seed!(0)
     @testset "CheckNextMoves" begin
         p1_moves = [GridMove(1,3,"right"), GridMove(1,4,"up")]
         p2_moves = [GridMove(2,2,"right")]
-        #b = GridBoard(p1_moves, p2_moves, 5, 4)
-        b = GridBoard(p1_moves, p2_moves, 5, [1 2])
+        b = GridBoard(p1_moves, p2_moves, 5, [1 3])
 
         moves = next_moves(b)
 
-        println(moves)
-
-        correct_moves = GridMove[
-            GridMove(2, 2, "right"), GridMove(1, 2, "left" ), GridMove(3, 2, "right"),
-            GridMove(2, 3, "up"   ), GridMove(2, 1, "down" ), GridMove(0, 2, "left" ),
-            GridMove(1, 3, "up"   ), GridMove(1, 1, "down" ), GridMove(2, 2, "left" ),
-            GridMove(4, 2, "right"), GridMove(3, 3, "up"   ), GridMove(3, 1, "down" ),
-            GridMove(1, 3, "left" ), GridMove(3, 3, "right"), GridMove(2, 4, "up"   ),
-            GridMove(2, 2, "down" ), GridMove(1, 1, "left" ), GridMove(3, 1, "right"),
-            GridMove(2, 2, "up"   ), GridMove(2, 0, "down" )]
+        correct_moves = GridMove[     GridMove(2, 2, "right"),
+             GridMove(1, 2, "left" ), GridMove(3, 2, "right"), GridMove(2, 3, "up"   ),
+             GridMove(2, 1, "down" ), GridMove(0, 2, "left" ), GridMove(1, 3, "up"   ),
+             GridMove(1, 1, "down" ), GridMove(4, 2, "right"), GridMove(3, 3, "up"   ),
+             GridMove(3, 1, "down" ), GridMove(1, 3, "left" ), GridMove(3, 3, "right"),
+             GridMove(2, 4, "up"   ), GridMove(1, 1, "left" ), GridMove(3, 1, "right"),
+             GridMove(2, 0, "down" ), GridMove(0, 3, "up"   ), GridMove(0, 1, "down" ),
+             GridMove(0, 3, "left" ), GridMove(1, 4, "up"   ), GridMove(0, 1, "left" ),
+             GridMove(1, 0, "down" ), GridMove(4, 3, "up"   ), GridMove(4, 1, "down" ),
+             GridMove(4, 3, "right"), GridMove(3, 4, "up"   ), GridMove(4, 1, "right"),
+             GridMove(3, 0, "down" ), GridMove(1, 4, "left" ), GridMove(3, 4, "right"),
+             GridMove(1, 0, "left" ), GridMove(3, 0, "right")]
     
         for m ∈ moves
             @test m ∈ correct_moves
@@ -88,7 +89,6 @@ seed!(0)
         for m̂ ∈ correct_moves
             @test m̂ ∈ moves
         end
-        @test true
 
     end # testset
 

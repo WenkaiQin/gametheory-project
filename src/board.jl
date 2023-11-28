@@ -38,7 +38,6 @@ mutable struct GridBoard <: Board
 
 
     function GridBoard(p1_ms::Vector{GridMove}, p2_ms::Vector{GridMove}, g_size::Int, ran::Array)
-        println("Default constructor used.")
         new(p1_ms, p2_ms, g_size, ran)
     end
 
@@ -108,13 +107,25 @@ function next_moves(board)
                     continue
                 end
 
-                # No need to check the entire history - the range check is
-                # already checked via the for loops. We save some performance
-                # here.
                 if player == 1
-                    board_candidate = GridBoard([move_candidate], [board.p2_moves[end]])
+                    # This is more costly but more verbose. Good for debugging more efficient renditions.
+                    # board_candidate = GridBoard([board.p1_moves; move_candidate],
+                                                 # board.p2_moves,
+                                                 # board.grid_size,
+                                                 # board.range)
+                    board_candidate = GridBoard([board.p1_moves[end]; move_candidate],
+                                                [board.p2_moves[end]],
+                                                 board.grid_size,
+                                                 board.range)
                 elseif player == 2
-                    board_candidate = GridBoard([board.p1_moves[end]], [move_candidate])
+                    # board_candidate = GridBoard( board.p1_moves,
+                                                # [board.p2_moves; move_candidate],
+                                                 # board.grid_size,
+                                                 # board.range)
+                    board_candidate = GridBoard( board.p1_moves[end-1:end],
+                                                [board.p2_moves[end]; move_candidate],
+                                                 board.grid_size,
+                                                 board.range)
                 end # if player
 
                 if is_legal(board_candidate)
@@ -139,7 +150,7 @@ function is_legal(board)
     end
 
     # Check move histories.
-    if !check_history(board.p1_moves, board) || !check_history(board.p2_moves, board)
+    if !check_history(board.p1_moves, board, 1) || !check_history(board.p2_moves, board, 2)
         return false
     end
 
@@ -149,7 +160,9 @@ function is_legal(board)
 end
 export is_legal
 
-function check_history(moves, board)
+function check_history(moves, board, player)
+
+    flag_debug = false
 
     # Per-move checks.
     for position in moves
@@ -179,38 +192,47 @@ function check_history(moves, board)
         rel_y = after_move.y_position-before_move.y_position
 
         # Check distance between moves by 1-norm.
-        player = up_next(board) # Comment out if symmetric ranges
+        # player = up_next(board) # Comment out if symmetric ranges
         # if (abs(rel_x))+abs(rel_y)) > board.range
         if (abs(rel_x)+abs(rel_y)) > board.range[player]
+            if flag_debug
+                println("reason: out of range")
+                print("player = ")
+                println(player)
+            end
             return false
         end
 
-        # WQ: Removed temporarily given that depth-first-search gives the
-        # legal directions already. Remove permamently on confirmation of
-        # method.
-        # # Check that the directions match the moves made. But don't bother
-        # # checking if the player stood still.
-        # if !(rel_x==0 && rel_y==0)
+        # Check that the directions match the moves made. If the player did
+        # not move, no direction change is permitted.
+        if !(rel_x==0 && rel_y==0)
+            compatible_directions = []
+            if rel_x>0
+                push!(compatible_directions, "right")
+            end
+            if rel_y>0
+                push!(compatible_directions, "up")
+            end
+            if rel_x<0
+                push!(compatible_directions, "left")
+            end
+            if rel_y<0
+                push!(compatible_directions, "down")
+            end
 
-        #     compatible_directions = []
-        #     if rel_x>0
-        #         push!(compatible_directions, "right")
-        #     end
-        #     if rel_y>0
-        #         push!(compatible_directions, "up")
-        #     end
-        #     if rel_x<0
-        #         push!(compatible_directions, "left")
-        #     end
-        #     if rel_y<0
-        #         push!(compatible_directions, "down")
-        #     end
+            if after_move.direction ∉ compatible_directions
+                if flag_debug
+                    println("reason: direction incompatible")
+                    println(before_move)
+                    println(after_move)
+                    println(direction)
+                end
+                return false
+            end
 
-        #     if after_move.direction ∉ compatible_directions
-        #         return false
-        #     end
-
-        # end
+        elseif after_move.direction ≠ before_move.direction
+            return false
+        end
     end
 
     # If all tests pass, return true.
