@@ -190,16 +190,35 @@ function play_game(; T = 0.1)
         move_prior = board.p2_moves[end]
 
         # Query user for move.
-        println("Your move! X = ?")
-        col = move_prior.x_position+parse(Int, readline())
-        println("Y = ?")
-        row = move_prior.y_position+parse(Int, readline())
-        println("Direction?")
-        dir = readline()
+        check = false
+        while check == false
+            println("Enter Valid Move")
 
-        # Construct next board state and repeat.
-        m = GridMove(col,row,dir)
-        push!(board.p2_moves,m)
+            println("Your move! X = ?")
+            col = move_prior.x_position+parse(Int, readline())
+            println("Y = ?")
+            row = move_prior.y_position+parse(Int, readline())
+            println("Direction?")
+            #dir = readline()
+            direction = readline()
+            if direction == "R"
+                dir = "right"
+            elseif direction == "L"
+                dir = "left"
+            elseif direction == "U"
+                dir = "up"
+            else direction == "D"
+                dir = "down"
+            end
+
+            # Construct next board state and repeat.
+            m = GridMove(col,row,dir)
+            push!(board.p2_moves,m)
+
+            check = is_legal(board)
+            println(check)
+        end
+        
         @assert is_legal(board)
 
         over, result = is_over(board)
