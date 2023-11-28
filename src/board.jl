@@ -319,14 +319,6 @@ export strike_zone
 function is_obstructed(position::GridMove, board::GridBoard)
 
     for obstacle in board.obstacles
-        # println(position)
-        # println(obstacle)
-        # println(obstacle.x_bounds)
-        # println(obstacle.y_bounds)
-        # print("X check: ")
-        # println(obstacle.x_bounds[1] ≤ position.x_position ≤ obstacle.x_bounds[2])
-        # print("Y check: ")
-        # println(obstacle.y_bounds[1] ≤ position.y_position ≤ obstacle.y_bounds[2])
         if ((obstacle.x_bounds[1] ≤ position.x_position ≤ obstacle.x_bounds[2])
             && (obstacle.y_bounds[1] ≤ position.y_position ≤ obstacle.y_bounds[2]))
             # println('a')
