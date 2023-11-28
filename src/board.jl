@@ -1,3 +1,5 @@
+global flag_debug = true
+
 # Abstract types for Board and Move.
 abstract type Board end
 export Board
@@ -168,6 +170,9 @@ function is_legal(board)
 
     # Check number of moves per player. Assume p1 goes first.
     if length(board.p2_moves)>length(board.p1_moves)
+        if flag_debug
+            println("Reason: P2 has too many moves.")
+        end
         return false
     end
 
@@ -184,25 +189,35 @@ export is_legal
 
 function check_history(moves, board, player)
 
-    flag_debug = false
-
     # Per-move checks.
     for position in moves
 
         # Check out of bounds.
         if     ~(0 ≤ position.x_position ≤ board.grid_size-1)
+            if flag_debug
+                println("Reason: X out of bounds.")
+            end
             return false
         elseif ~(0 ≤ position.y_position ≤ board.grid_size-1)
+            if flag_debug
+                println("Reason: Y out of bounds.")
+            end
             return false
         end
 
         # Check that the directions are valid.
         if position.direction ∉ VALID_DIRECTIONS
+            if flag_debug
+                println("Reason: direction invalid.")
+            end
             return false
         end
 
         # Check obstacle collision.
         if is_obstructed(position, board)
+            if flag_debug
+                println("Reason: obstacle collision.")
+            end
             return false
         end
 
@@ -224,9 +239,11 @@ function check_history(moves, board, player)
         # if (abs(rel_x))+abs(rel_y)) > board.range
         if (abs(rel_x)+abs(rel_y)) > board.range[player]
             if flag_debug
-                println("reason: out of range")
+                println("Reason: out of range.")
                 print("player = ")
                 println(player)
+                print("board.range[player] = ")
+                println(board.range[player])
             end
             return false
         end
@@ -250,15 +267,18 @@ function check_history(moves, board, player)
 
             if after_move.direction ∉ compatible_directions
                 if flag_debug
-                    println("reason: direction incompatible")
+                    println("Reason: direction incompatible.")
                     println(before_move)
                     println(after_move)
-                    println(direction)
+                    println(after_move.direction)
                 end
                 return false
             end
 
         elseif after_move.direction ≠ before_move.direction
+            if flag_debug
+                println("Reason: stationary movement, with direction change.")
+            end
             return false
         end
     end

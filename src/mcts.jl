@@ -1,7 +1,7 @@
-# # Construct a Monte Carlo search tree from the given board.
-# # Should accept an optional argument T which specifies the number of seconds
-# # spent in tree construction.
-# # For reference: https://en.wikipedia.org/wiki/Monte_Carlo_tree_search
+# Construct a Monte Carlo search tree from the given board.
+# Should accept an optional argument T which specifies the number of seconds
+# spent in tree construction.
+# For reference: https://en.wikipedia.org/wiki/Monte_Carlo_tree_search
 function construct_search_tree(board::GridBoard; T = 1)
 
     flag_print_vals = false
@@ -103,8 +103,8 @@ end
 export upper_confidence_strategy
 
 # Walk the tree to find a leaf Node, choosing children at each level according
-# to the function provided, whose signature is Foo(Node)::Node,
-# such as the upper_confidence_strategy.
+# to the function provided, whose signature is Foo(Node)::Node, such as the
+# upper_confidence_strategy.
 function find_leaf(root, strategy)
 
     curr_node = root
@@ -155,7 +155,7 @@ function simulate(node)
 end
 export simulate
 
-# # Backpropagate values up the tree from the given (leaf) node.
+# Backpropagate values up the tree from the given (leaf) node.
 function backpropagate!(leaf, result)
     curr_node = leaf
     while curr_node != nothing
@@ -166,12 +166,16 @@ function backpropagate!(leaf, result)
 end
 export backpropagate!
 
-# # Play a game! Parameterized by time given to the CPU. Assumes CPU plays first.
-# export play_game
-function play_game(; T = 0.1)
-    p1 = [GridMove(0,0)]
-    p2 = [GridMove(19,19)]
-    board = GridBoard(p1,p2)
+# Play a game! Parameterized by time given to the CPU. Assumes CPU plays first.
+function play_game(; T = 2)
+    p1 = [GridMove( 0,  0, "right")]
+    p2 = [GridMove(19, 19, "left")]
+    grid = 20
+    range = [4 3]
+    obstacles = [GridObstacle([3,4], [3,4])
+                 GridObstacle([7,8], [7,8])
+                 GridObstacle([4,7], [4,7])]
+    board = GridBoard(p1, p2, grid, range, obstacles)
 
     result = 0
     while true
@@ -191,34 +195,49 @@ function play_game(; T = 0.1)
 
         # Query user for move.
         check = false
+        
         while check == false
-            println("Enter Valid Move")
 
-            println("Your move! X = ?")
-            col = move_prior.x_position+parse(Int, readline())
-            println("Y = ?")
-            row = move_prior.y_position+parse(Int, readline())
-            println("Direction?")
-            #dir = readline()
-            direction = readline()
-            if direction == "R"
-                dir = "right"
-            elseif direction == "L"
-                dir = "left"
-            elseif direction == "U"
-                dir = "up"
-            else direction == "D"
-                dir = "down"
+            try
+                println("Your move! X = ?")
+                col = move_prior.x_position+parse(Int, readline())
+                println("Y = ?")
+                row = move_prior.y_position+parse(Int, readline())
+                println("Direction?")
+                #dir = readline()
+
+                direction = lowercase(readline())
+                if direction ∈ ("r", "right")
+                    dir = "right"
+                    println(dir)
+                elseif direction ∈ ("l", "left")
+                    dir = "left"
+                    println(dir)
+                elseif direction ∈ ("u", "left")
+                    dir = "up"
+                    println(dir)
+                elseif direction ∈ ("d", "down")
+                    dir = "down"
+                    println(dir)
+                elseif direction ∈ ("q", "quit")
+                    "a"
+                    return 1
+                end
+
+                # Construct next board state and repeat.
+                m = GridMove(col,row,dir)
+
+                check = is_legal(board)
+                @assert check
+
+            catch e
+                println("Invalid move.")
+                println(e)
             end
 
-            # Construct next board state and repeat.
-            m = GridMove(col,row,dir)
-            push!(board.p2_moves,m)
-
-            check = is_legal(board)
-            println(check)
         end
         
+        push!(board.p2_moves,m)
         @assert is_legal(board)
 
         over, result = is_over(board)

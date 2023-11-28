@@ -109,7 +109,9 @@ end # testset
     board₀ = GridBoard([GridMove(0, 0, "right")],
                        [GridMove(9, 9, "left" )],
                        10, 3,
-                       [GridObstacle([1,8], [1,8])] )
+                       [GridObstacle([3,4], [3,4])
+                        GridObstacle([7,8], [7,8])
+                        GridObstacle([4,7], [4,7])])
     root = construct_search_tree(board₀, T = 0.1)
 
     @testset "CheckValidTree" begin
