@@ -195,7 +195,7 @@ function play_game(; T = 2)
 
         # Query user for move.
         check = false
-        
+
         while check == false
 
             try
@@ -209,18 +209,13 @@ function play_game(; T = 2)
                 direction = lowercase(readline())
                 if direction ∈ ("r", "right")
                     dir = "right"
-                    println(dir)
                 elseif direction ∈ ("l", "left")
                     dir = "left"
-                    println(dir)
                 elseif direction ∈ ("u", "left")
                     dir = "up"
-                    println(dir)
                 elseif direction ∈ ("d", "down")
                     dir = "down"
-                    println(dir)
                 elseif direction ∈ ("q", "quit")
-                    "a"
                     return 1
                 end
 
