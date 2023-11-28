@@ -8,10 +8,17 @@ function construct_search_tree(board::GridBoard; T = 1)
     # Create a root node for the tree from this board state.
     root = Node(board)
 
+    num_runs = 0
+    my_fav_child = []
+
     # Check if there's still time left on the clock.
     while time() - start_time < T
         # Find a leaf of the tree using UCT.
         leaf = find_leaf(root, upper_confidence_strategy)
+        if num_runs==0
+            my_fav_child = leaf
+        end
+
         over, result = is_over(leaf.board)
         if over
             backpropagate!(leaf, result)
@@ -39,6 +46,10 @@ function construct_search_tree(board::GridBoard; T = 1)
             # Backpropagate result up the tree.
             backpropagate!(child, result)
         end
+
+        num_runs = num_runs+1
+        println(my_fav_child.num_episodes)
+        println(my_fav_child.total_value)
     end
 
     return root
