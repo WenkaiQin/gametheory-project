@@ -1,4 +1,4 @@
-global flag_debug = true
+global flag_debug = false
 
 # Abstract types for Board and Move.
 abstract type Board end
@@ -77,6 +77,10 @@ mutable struct GridBoard <: Board
 
     function GridBoard(p1_ms::Vector{GridMove}, p2_ms::Vector{GridMove})
         new(p1_ms, p2_ms, DEFAULT_BOARD_SIZE, DEFAULT_RANGE, Vector{GridObstacle}())
+    end
+
+    function GridBoard(board::GridBoard)
+        new(board.p1_moves, board.p2_moves, board.grid_size, board.range, board.obstacles)
     end
 
 end # struct

@@ -171,7 +171,7 @@ function play_game(; T = 2)
     p1 = [GridMove( 0,  0, "right")]
     p2 = [GridMove(19, 19, "left")]
     grid = 20
-    range = [4 3]
+    range = [4 4]
     obstacles = [GridObstacle([3,4], [3,4])
                  GridObstacle([7,8], [7,8])
                  GridObstacle([4,7], [4,7])]
@@ -179,6 +179,7 @@ function play_game(; T = 2)
 
     result = 0
     while true
+
         # CPU's turn.
         root = construct_search_tree(board, T = T)
         board = upper_confidence_strategy(root).board
@@ -195,6 +196,8 @@ function play_game(; T = 2)
 
         # Query user for move.
         check = false
+
+        m = GridMove(-1, -1)
 
         while check == false
 
@@ -221,9 +224,15 @@ function play_game(; T = 2)
 
                 # Construct next board state and repeat.
                 m = GridMove(col,row,dir)
+                board_c = GridBoard(copy(board.p1_moves), copy(board.p2_moves), grid, range, obstacles)
+                push!(board_c.p2_moves, m)
 
-                check = is_legal(board)
-                @assert check
+                println(m)
+                println(board_c.p1_moves)
+                println(board_c.p2_moves)
+
+                check = is_legal(board_c)
+                @assert is_legal(board_c)
 
             catch e
                 println("Invalid move.")
@@ -233,7 +242,7 @@ function play_game(; T = 2)
         end
         
         push!(board.p2_moves,m)
-        @assert is_legal(board)
+        # @assert is_legal(board)
 
         over, result = is_over(board)
         if over
